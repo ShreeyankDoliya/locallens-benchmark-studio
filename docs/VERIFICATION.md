@@ -40,12 +40,12 @@ Run IDs are unique in SQLite. Repeating the sample-generation commands against a
 ## Results
 
 - Dataset validation: **20 tasks**, **5 categories**, **6 perturbation groups**.
-- Python suite: **30 tests passed**, including every published report and index entry.
+- Python suite: **31 tests passed**, including every published report and index entry.
 - Browser suite: **7 tests passed**, including mobile overflow, filters, comparison, evidence, downloads, output escaping and themed dropdown keyboard controls.
 - `mock-demo`: **40 completed model/task results**.
 - `mock-repeat`: stopped at **7 results**, resumed to **40**, preserving saved results.
 - Report reconstructed from published JSON: **byte-identical**, `cmp` exited 0.
-- Source fingerprints in both exported reports match the implemented runner.
+- Source fingerprints identify the producing runner. Archived reports retain their original source fingerprint when the implementation changes later.
 
 | Model | Passed | Pass rate | Terminal errors | p50 | p95 |
 |---|---:|---:|---:|---:|---:|
@@ -95,3 +95,5 @@ The real run stopped after seven task results and resumed to 40 without replacin
 There were four task-level disagreements. The strict format checks rejected extra explanations and Markdown-fenced JSON even when the answer content was otherwise correct. Other responses contained incorrect reasoning or code-trace answers. The 256-token output limit also truncated some long explanations. These are narrow, configuration-specific observations on 20 tasks, not evidence of overall superiority or stable speed rankings. No warm-up requests were excluded.
 
 Full model digests, quantization, native templates, generation settings, raw responses, token counts, timings and hardware notes are preserved in `dashboard/data/local-qwen-m1-pro.json`. The example machine configuration is `configs/ollama-m1-pro.json`; edit its hardware notes before using it on another computer. Homebrew installed Ollama with its MLX dependencies and upgraded its Python/readline dependencies; the benchmark continued to use the existing Python 3.12 virtual environment. Ollama was launched for this session, not registered to start at login.
+
+The expanded CI suite exposed a request-spacing issue when a synchronous SQLite checkpoint delayed dispatch under concurrency. The limiter now records the dispatch time after checkpointing, and generation runs in the worker task under a total timeout. A regression test adds a slow checkpoint and verifies the configured spacing. The published local run used concurrency 1 and retains its original evidence and source fingerprint.

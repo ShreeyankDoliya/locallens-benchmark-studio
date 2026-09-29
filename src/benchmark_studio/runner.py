@@ -46,6 +46,12 @@ class RateLimiter:
             await asyncio.sleep(max(0, self.next_start - time.monotonic()))
             self.next_start = time.monotonic() + self.interval
 
+    def mark_started(self) -> None:
+        # SQLite checkpointing can take time after a slot is reserved. Base the
+        # next slot on dispatch, not the earlier reservation. The caller must
+        # enter generate directly without yielding between this and dispatch.
+        self.next_start = time.monotonic() + self.interval
+
 
 async def execute(store: Store, run_id: str, tasks: list[Task] | None = None,
                   config: RunConfig | None = None, *,
@@ -108,7 +114,11 @@ async def execute(store: Store, run_id: str, tasks: list[Task] | None = None,
                     error = None
                     retryable = False
                     try:
-                        generation = await asyncio.wait_for(providers[model.id].generate(task.prompt, model.options), config.timeout_seconds)
+                        limiter.mark_started()
+                        # timeout() runs generate in this worker; wait_for() would
+                        # schedule another task and could compress request starts.
+                        async with asyncio.timeout(config.timeout_seconds):
+                            generation = await providers[model.id].generate(task.prompt, model.options)
                     except (ProviderError, TimeoutError) as exc:
                         error = str(exc) or "Generation exceeded total timeout"
                         retryable = isinstance(exc, TimeoutError) or exc.retryable

@@ -171,3 +171,24 @@ class RunnerTests(unittest.IsolatedAsyncioTestCase):
             altered = copy.deepcopy(data)
             mutate(altered)
             with self.assertRaises(ValueError): verify_export(altered)
+
+
+    async def test_slow_checkpoint_does_not_compress_request_starts(self):
+        from unittest.mock import patch
+        FakeProvider.mode = 'slow'
+        self.config = self.config.model_copy(update={'concurrency':2, 'requests_per_second':25.0})
+        original = self.store.begin_attempt
+        first = True
+
+        def delayed_checkpoint(*args):
+            nonlocal first
+            if first:
+                first = False
+                time.sleep(.06)
+            return original(*args)
+
+        with patch.object(self.store, 'begin_attempt', side_effect=delayed_checkpoint):
+            await self.run_it()
+        self.assertEqual(FakeProvider.calls, 4)
+        gaps = [b - a for a, b in zip(FakeProvider.starts, FakeProvider.starts[1:])]
+        self.assertTrue(all(gap >= .035 for gap in gaps), gaps)
