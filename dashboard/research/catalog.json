@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-09-29",
+  "benchmarks": [
+    {
+      "id": "terminal-bench-2",
+      "name": "Terminal-Bench 2.0",
+      "paper_title": "Terminal-Bench: Benchmarking Agents on Hard, Realistic Tasks in Command Line Interfaces",
+      "paper": "https://arxiv.org/abs/2601.11868v1",
+      "repository": "https://github.com/harbor-framework/terminal-bench-2",
+      "measures": "End-to-end terminal task completion by an agent, including environment interaction and verification.",
+      "limitations": "Agent scaffold, sandbox resources, network access, time limits and model all affect success. A prompt-only score is not Terminal-Bench.",
+      "protocol": "Harbor + Terminus 2; official task containers and binary final-state verifiers. Report per-task trials and errors; repeated trials are separate from retrying infrastructure failures.",
+      "scope": "89 tasks · native Docker environments",
+      "status": "Repository pinned; one oracle and no-op control checked. GLM evaluation not run."
+    },
+    {
+      "id": "humaneval",
+      "name": "HumanEval",
+      "paper_title": "Evaluating Large Language Models Trained on Code",
+      "paper": "https://arxiv.org/abs/2107.03374",
+      "repository": "https://github.com/openai/human-eval",
+      "measures": "Python function synthesis from a signature and docstring, checked by execution tests.",
+      "limitations": "Small public tasks may be contaminated or saturated; test passing does not prove secure or maintainable software.",
+      "protocol": "Use original completion prompts and hidden tests. Execute generated code in disposable containers. With one completion per task report pass@1 only; chat wrappers must be disclosed.",
+      "scope": "164 Python functions",
+      "status": "Official data downloaded and checksummed; native scoring integration and GLM evaluation pending."
+    },
+    {
+      "id": "mbpp",
+      "name": "MBPP",
+      "paper_title": "Program Synthesis with Large Language Models",
+      "paper": "https://arxiv.org/abs/2108.07732",
+      "repository": "https://github.com/google-research/google-research/tree/master/mbpp",
+      "measures": "Short Python programs from natural-language specifications.",
+      "limitations": "Basic programming coverage and sparse tests; original and sanitized subsets are different benchmarks. Public tests can invite overfitting.",
+      "protocol": "Original test IDs 11–510; keep IDs 2, 3, 4 as three-shot demonstrations for paper-style prompting. Official supplied tests are part of that prompt protocol. Record any zero-shot adaptation separately.",
+      "scope": "500 test tasks · 974 total rows",
+      "status": "Original test split verified; sandbox scorer and GLM evaluation pending."
+    },
+    {
+      "id": "gsm8k",
+      "name": "GSM8K",
+      "paper_title": "Training Verifiers to Solve Math Word Problems",
+      "paper": "https://arxiv.org/abs/2110.14168",
+      "repository": "https://github.com/openai/grade-school-math",
+      "measures": "Multi-step grade-school arithmetic expressed in word problems.",
+      "limitations": "Answer accuracy does not validate every reasoning step. Widely published questions create contamination risk; not a general reasoning ranking.",
+      "protocol": "Test split only; fixed prompt and numeric answer extraction after the final #### marker. Disclose examples, reasoning settings and extraction failures. Do not use a learned verifier unless labeled as a different protocol.",
+      "scope": "1,319 test questions",
+      "status": "Official test split checksummed; scorer integration and GLM evaluation pending."
+    },
+    {
+      "id": "ifeval",
+      "name": "IFEval",
+      "paper_title": "Instruction-Following Evaluation for Large Language Models",
+      "paper": "https://arxiv.org/abs/2311.07911",
+      "repository": "https://github.com/google-research/google-research/tree/master/instruction_following_eval",
+      "measures": "Compliance with objectively checkable instructions such as word counts, keywords and formatting.",
+      "limitations": "Constraint compliance does not establish factual truth, helpfulness or safety. Checker dependencies and strict/loose variants affect scores.",
+      "protocol": "Retain official prompts, instruction IDs and kwargs; use upstream checkers. Report strict and loose scores separately at both prompt and instruction level.",
+      "scope": "541 prompts · 25 instruction types",
+      "status": "Official prompts checksummed; upstream checker integration and GLM evaluation pending."
+    }
+  ],
+  "sources": [
+    {
+      "id": "humaneval",
+      "repository": "https://github.com/openai/human-eval",
+      "revision": "6d43fb980f9fee3c892a914eda09951f772ad10d",
+      "path": "data/HumanEval.jsonl.gz",
+      "sha256": "b796127e635a67f93fb35c04f4cb03cf06f38c8072ee7cee8833d7bee06979ef",
+      "rows": 164,
+      "evaluation_rows": 164,
+      "split": "all"
+    },
+    {
+      "id": "mbpp",
+      "repository": "https://github.com/google-research/google-research",
+      "revision": "d36068b845da4c2b24927fee2cea1e6ef98dadda",
+      "path": "mbpp/mbpp.jsonl",
+      "sha256": "ccf64ceae9c5403bf50a044cb6d505bfd2a2963ee58338ba268fd65beab92a9f",
+      "rows": 974,
+      "evaluation_rows": 500,
+      "split": "original test IDs 11–510"
+    },
+    {
+      "id": "gsm8k",
+      "repository": "https://github.com/openai/grade-school-math",
+      "revision": "3101c7d5072418e28b9008a6636bde82a006892c",
+      "path": "grade_school_math/data/test.jsonl",
+      "sha256": "3730d312f6e3440559ace48831e51066acaca737f6eabec99bccb9e4b3c39d14",
+      "rows": 1319,
+      "evaluation_rows": 1319,
+      "split": "test"
+    },
+    {
+      "id": "ifeval",
+      "repository": "https://github.com/google-research/google-research",
+      "revision": "d36068b845da4c2b24927fee2cea1e6ef98dadda",
+      "path": "instruction_following_eval/data/input_data.jsonl",
+      "sha256": "67ffeee0fcb87c317c5b08a2de85557b4a7e96ada6178aa645b4954fe4b53d49",
+      "rows": 541,
+      "evaluation_rows": 541,
+      "split": "all"
+    }
+  ],
+  "published_scores": [
+    {
+      "benchmark": "Terminal-Bench 2.1",
+      "model": "GLM-5.3",
+      "score": 88.2,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Claude Code 2.1.207; six-hour limit."
+    },
+    {
+      "benchmark": "Terminal-Bench 2.1",
+      "model": "GLM-5.2",
+      "score": 81.0,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Claude Code 2.1.207; six-hour limit."
+    },
+    {
+      "benchmark": "Terminal-Bench 3.0",
+      "model": "GLM-5.3",
+      "score": 28.3,
+      "metric": "avg@3 (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Claude Code 2.1.207; three rollouts; ten-hour limit."
+    },
+    {
+      "benchmark": "Terminal-Bench 3.0",
+      "model": "GLM-5.2",
+      "score": 4.6,
+      "metric": "avg@3 (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Claude Code 2.1.207; three rollouts; ten-hour limit."
+    },
+    {
+      "benchmark": "DeepSWE v1.1",
+      "model": "GLM-5.3",
+      "score": 66.9,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "mini-swe-agent; six-hour limit."
+    },
+    {
+      "benchmark": "DeepSWE v1.1",
+      "model": "GLM-5.2",
+      "score": 46.2,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "mini-swe-agent; six-hour limit."
+    },
+    {
+      "benchmark": "Toolathlon Verified",
+      "model": "GLM-5.3",
+      "score": 73.0,
+      "metric": "Mean pass@1 (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Official evaluation service; three independent runs."
+    },
+    {
+      "benchmark": "Toolathlon Verified",
+      "model": "GLM-5.2",
+      "score": 59.9,
+      "metric": "Mean pass@1 (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Official evaluation service; three independent runs."
+    },
+    {
+      "benchmark": "AutomationBench v1.0.6",
+      "model": "GLM-5.3",
+      "score": 48.2,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Version 1.0.6 with the PR #13 fix."
+    },
+    {
+      "benchmark": "AutomationBench v1.0.6",
+      "model": "GLM-5.2",
+      "score": 26.2,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Version 1.0.6 with the PR #13 fix."
+    },
+    {
+      "benchmark": "Agents’ Last Exam · ALE-CLI",
+      "model": "GLM-5.3",
+      "score": 28.5,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Claude Code; official evaluators; per-task limits."
+    },
+    {
+      "benchmark": "Agents’ Last Exam · ALE-CLI",
+      "model": "GLM-5.2",
+      "score": 23.8,
+      "metric": "Reported score (%)",
+      "origin": "vendor_reported",
+      "source": "https://z.ai/blog/glm-5.3",
+      "source_date": "2026-08-14",
+      "protocol": "Claude Code; official evaluators; per-task limits."
+    },
+    {
+      "benchmark": "Terminal-Bench 2.0",
+      "model": "GLM-4.6",
+      "score": 24.5,
+      "metric": "Resolution rate (%)",
+      "origin": "paper_reported",
+      "source": "https://arxiv.org/abs/2601.11868v1",
+      "source_date": "2026-01-17",
+      "protocol": "Terminus 2; paper Table 2, page 81. Paper experiments use Daytona sandboxes.",
+      "uncertainty": "±2.4 percentage points (95% confidence interval reported by authors)"
+    }
+  ],
+  "measured_glm_runs": [],
+  "evaluation_status": "No GLM API evaluations have been run. Provider endpoint, comparison model and usage budget await confirmation. Published scores below are external references, not local measurements."
+}

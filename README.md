@@ -4,6 +4,8 @@
 
 [Live dashboard](https://ShreeyankDoliya.github.io/locallens-benchmark-studio/) · [Methodology](docs/METHODOLOGY.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md)
 
+[Research dashboard](https://shreeyankdoliya.github.io/locallens-benchmark-studio/research.html) · [Terminal-Bench paper analysis and five-benchmark plan](docs/RESEARCH.md)
+
 LocalLens runs a versioned set of tasks against local models, saves the evidence in SQLite, and publishes portable JSON reports to a static dashboard. The complete mock workflow needs no model download, API key, cloud account, paid service, or credit card. Local model inference uses Ollama on your own computer.
 
 The GitHub Pages site **only displays published results**. Evaluations run locally through the Python CLI. The dashboard has no backend, analytics, CDN assets, or connection to your model server.
@@ -19,6 +21,17 @@ The GitHub Pages site **only displays published results**. Evaluations run local
 - Model digests, Ollama version, templates, parameters, generation settings, dataset/config/source fingerprints, UTC timestamps, host details, and raw responses.
 - Model/category pass rates, p50/p90/p95 latency, error rate, perturbation consistency, disagreement filters, and optional token-based cost estimates.
 - Static run comparison, searchable failure inspection, JSON downloads, Markdown reports, and GitHub Pages deployment.
+- Research catalog covering Terminal-Bench 2.0, HumanEval, MBPP, GSM8K and IFEval, with pinned data sources and explicit protocol limits.
+- Source-linked external GLM reference scores, the complete 89-task Terminal-Bench inventory, and real oracle/no-op Docker controls. **GLM API evaluations have not run**; these external scores are labeled separately from our measurements.
+
+The research track keeps the original zero-cost workflow intact. Paid API inference is optional and is not implemented or required by the core runner. For research data validation and credential-free preparation:
+
+```bash
+.venv/bin/python -m benchmark_studio.research verify
+.venv/bin/python -m benchmark_studio.research prepare --limit 10
+```
+
+Preparation downloads the four prompt datasets at pinned revisions, verifies hashes and splits, and saves a repeatable task selection under `runs/research/sources`. It does not perform inference or replace the official scorers. The [research analysis](docs/RESEARCH.md) contains exact Docker control commands, observed results, the remaining GLM integration work, and hardware limitations.
 
 ## Quick start: no models or API keys
 

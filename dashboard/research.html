@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Five research benchmarks, GLM published reference scores, and native Terminal-Bench harness evidence.">
+  <meta name="theme-color" content="#131a20"><title>Research benchmarks · LocalLens</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css"><link rel="stylesheet" href="research.css">
+  <script type="module" src="research.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to research</a>
+<aside class="sidebar">
+  <a class="brand" href="./"><span class="logo" aria-hidden="true">◈</span><span>LocalLens<small>LLM BENCHMARK STUDIO</small></span></a>
+  <div class="workspace-label">WORKSPACE</div>
+  <nav aria-label="Main navigation">
+    <a class="nav-link" href="./"><span aria-hidden="true">▦</span> Local results</a>
+    <a class="nav-link active" href="#references"><span aria-hidden="true">◇</span> Research benchmarks</a>
+    <a class="nav-link" href="#native-tasks"><span aria-hidden="true">⌕</span> Terminal-Bench tasks</a>
+    <a class="nav-link" href="#papers"><span aria-hidden="true">≡</span> Papers & protocols</a>
+  </nav>
+  <div class="sidebar-note"><span class="status-dot"></span> Sources before scores.<p>Published references and local measurements have different evidence.</p><a href="https://github.com/ShreeyankDoliya/locallens-benchmark-studio/blob/main/docs/RESEARCH.md">Read the research analysis ↗</a></div>
+  <div class="sidebar-footer"><span class="avatar">SD</span><span>Shreeyank Doliya<small>Built for reproducible research</small></span></div>
+</aside>
+<div class="page">
+  <header class="topbar"><span>Workspace <span class="slash">/</span> <strong>Research benchmarks</strong></span><span class="local-badge">PUBLISHED EVIDENCE</span></header>
+  <main id="main">
+    <div class="heading-row"><div><div class="eyebrow">READ THE PAPER. CHECK THE PROTOCOL.</div><h1>Beyond a single score<span>.</span></h1><p class="subtitle">GLM reference results, five benchmark papers, and inspectable harness checks.</p></div><a class="button primary" href="research/catalog.json" download>↓ Research JSON</a></div>
+    <div id="research-status" class="notice" role="status">Loading research catalog…</div>
+    <div class="metrics" id="research-metrics"></div>
+    <section id="references">
+      <div class="section-heading"><h2>Published model performance <span class="pill">EXTERNAL REFERENCES</span></h2><span>Not evaluated by LocalLens</span></div>
+      <p class="research-copy">Compare models only within a row and its documented protocol. These benchmarks use different tasks, agents and budgets; there is no combined ranking. GLM-5.2 is shown as the vendor’s published comparison model, not a confirmed API run target.</p>
+      <div class="panel"><div class="table-scroll"><table id="reference-table"><caption class="sr-only">Vendor-reported GLM scores, separate from local measurements</caption><thead><tr><th>Benchmark / version</th><th>GLM-5.3</th><th>GLM-5.2</th><th>Metric</th><th>Evidence</th></tr></thead><tbody></tbody></table></div></div>
+      <div id="paper-reference" class="paper-reference"></div>
+    </section>
+    <section id="harness-checks">
+      <div class="section-heading"><h2>Does the harness work? <span class="pill">LOCAL CONTROLS</span></h2><span>Official Docker task · no API calls</span></div>
+      <div class="control-checks" id="control-checks"></div>
+      <p class="research-copy">These checks cover one task on an Apple M1 Pro with 16 GiB RAM using Harbor 0.23.0 and the official amd64 image under emulation. They do not validate all 89 environments or establish any model’s capability. <a href="research/controls.json" download>Download control evidence ↗</a></p>
+    </section>
+    <section id="papers">
+      <div class="section-heading"><h2>Five benchmarks, five different questions</h2><span>Paper + task source + scoring protocol</span></div>
+      <div class="paper-grid" id="paper-grid"></div>
+    </section>
+    <section id="native-tasks">
+      <div class="section-heading"><h2>Terminal-Bench 2.0 task inventory</h2><span id="native-count"></span></div>
+      <p class="research-copy">All 89 tasks from the pinned official release. Resource declarations are per task; Apple Silicon compatibility and total Docker disk use must be checked before a full run. Source links open the exact revision.</p>
+      <div class="panel"><div class="filters"><div class="search-wrap"><label class="sr-only" for="native-search">Search Terminal-Bench tasks</label><input id="native-search" type="search" placeholder="Search the original terminal tasks…"></div><label class="sr-only" for="native-category">Terminal-Bench category</label><select id="native-category"><option value="">All categories</option></select></div>
+      <div class="table-scroll"><table id="native-table"><caption class="sr-only">Official task resource declarations and pinned source files</caption><thead><tr><th>Task / difficulty</th><th>Category</th><th>CPU / memory</th><th>Agent limit</th><th>Source</th></tr></thead><tbody></tbody></table></div>
+      <p class="empty" id="native-empty" hidden>No matching tasks.</p></div>
+      <details class="source-details"><summary>Dataset fingerprints and evaluation splits</summary><pre id="source-pins"></pre><a href="research/terminal-tasks.json" download>Download all task file hashes ↗</a></details>
+    </section>
+    <footer><span><strong>LocalLens</strong> · Research workspace</span><span id="reviewed-on"></span></footer>
+  </main>
+</div>
+<dialog id="research-dialog" aria-labelledby="research-detail-title"><div class="dialog-heading"><div><div class="eyebrow">SOURCE & PROTOCOL</div><h2 id="research-detail-title"></h2></div><button id="close-research-dialog" class="icon-button" aria-label="Close research details">×</button></div><div id="research-detail-content"></div></dialog>
+</body>
+</html>

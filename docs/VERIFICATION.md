@@ -1,5 +1,7 @@
 # Verification record
 
+Research extension: **37 Python tests and 10 browser tests pass**. The official Terminal-Bench certificate task passed all six tests with its reference solution and failed all six with a no-op agent. These are harness controls, not model scores. See [the research verification commands and limitations](RESEARCH.md#commands-and-observed-controls). No GLM API requests were sent.
+
 Verified on 2026-09-29 using macOS arm64, 8 logical CPUs, 16 GiB RAM, Python 3.12.13 and the installed Google Chrome browser. Mock requests do not use the GPU. Automatic host details and UTC timestamps are included in each JSON report.
 
 ## Commands executed
