@@ -67,7 +67,7 @@ class Catalog(BaseModel):
     benchmarks: list[Benchmark]
     sources: list[DatasetSource]
     published_scores: list[PublishedScore]
-    measured_glm_runs: list = Field(max_length=0)
+    measured_glm_runs: list[str]
     evaluation_status: str
 
     @model_validator(mode="after")
@@ -214,11 +214,35 @@ def export_controls(jobs: list[Path], task_repo: Path, output: Path) -> dict:
     return payload
 
 
+def prepare_scorers(output: Path, lock_path: Path):
+    """Fetch the pinned upstream IFEval implementation and verify tokenizer data."""
+    lock = json.loads(lock_path.read_text())
+    target = output / 'upstream' / 'instruction_following_eval'
+    target.mkdir(parents=True, exist_ok=True)
+    for name, expected in lock['files'].items():
+        path = target / name
+        data = path.read_bytes() if path.exists() else urlopen(f"https://raw.githubusercontent.com/google-research/google-research/{lock['revision']}/instruction_following_eval/{name}", timeout=60).read()
+        if hashlib.sha256(data).hexdigest() != expected:
+            raise ValueError(f'IFEval scorer checksum mismatch: {name}')
+        path.write_bytes(data)
+    import nltk
+    nltk_dir = output / 'nltk_data'
+    nltk.download('punkt_tab', download_dir=str(nltk_dir), quiet=True, raise_on_error=True)
+    for name, expected in lock['punkt_tab_english'].items():
+        actual = hashlib.sha256((nltk_dir / 'tokenizers/punkt_tab/english' / name).read_bytes()).hexdigest()
+        if actual != expected:
+            raise ValueError(f'NLTK English tokenizer checksum mismatch: {name}')
+    print('Pinned IFEval scorer and English tokenizer verified')
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--catalog", type=Path, default=Path("dashboard/research/catalog.json"))
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("verify")
+    scorers = sub.add_parser('prepare-scorers')
+    scorers.add_argument('--output', type=Path, default=Path('runs/research'))
+    scorers.add_argument('--lock', type=Path, default=Path('configs/ifeval-scorer-lock.json'))
     prep = sub.add_parser("prepare")
     prep.add_argument("--output", type=Path, default=Path("runs/research/sources"))
     prep.add_argument("--limit", type=int, default=10)
@@ -232,7 +256,9 @@ def main() -> None:
     args = parser.parse_args()
     catalog = load_catalog(args.catalog)
     if args.command == "verify":
-        print(f"Validated {len(catalog.benchmarks)} benchmarks and {len(catalog.published_scores)} published references; no GLM measurements.")
+        print(f"Validated {len(catalog.benchmarks)} benchmarks, {len(catalog.published_scores)} published references and {len(catalog.measured_glm_runs)} measured run references.")
+    elif args.command == 'prepare-scorers':
+        prepare_scorers(args.output, args.lock)
     elif args.command == "prepare":
         manifest = prepare(catalog, args.output, args.limit)
         for item in manifest["selections"]:

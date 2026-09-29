@@ -14,7 +14,7 @@
   <div class="workspace-label">WORKSPACE</div>
   <nav aria-label="Main navigation">
     <a class="nav-link" href="./"><span aria-hidden="true">▦</span> Local results</a>
-    <a class="nav-link active" href="#references"><span aria-hidden="true">◇</span> Research benchmarks</a>
+    <a class="nav-link active" href="#measurements"><span aria-hidden="true">◇</span> Research benchmarks</a>
     <a class="nav-link" href="#native-tasks"><span aria-hidden="true">⌕</span> Terminal-Bench tasks</a>
     <a class="nav-link" href="#papers"><span aria-hidden="true">≡</span> Papers & protocols</a>
   </nav>
@@ -24,12 +24,26 @@
 <div class="page">
   <header class="topbar"><span>Workspace <span class="slash">/</span> <strong>Research benchmarks</strong></span><span class="local-badge">PUBLISHED EVIDENCE</span></header>
   <main id="main">
-    <div class="heading-row"><div><div class="eyebrow">READ THE PAPER. CHECK THE PROTOCOL.</div><h1>Beyond a single score<span>.</span></h1><p class="subtitle">GLM reference results, five benchmark papers, and inspectable harness checks.</p></div><a class="button primary" href="research/catalog.json" download>↓ Research JSON</a></div>
+    <div class="heading-row"><div><div class="eyebrow">READ THE PAPER. CHECK THE PROTOCOL.</div><h1>Beyond a single score<span>.</span></h1><p class="subtitle">Measured GLM pilots, five benchmark papers, and every result open to inspection.</p></div><a class="button primary" href="research/measurements.json" download>↓ Measured results</a></div>
     <div id="research-status" class="notice" role="status">Loading research catalog…</div>
     <div class="metrics" id="research-metrics"></div>
+    <section id="measurements">
+      <div class="section-heading"><h2>Measured GLM pilot <span class="pill">ACTUAL API RUNS · SMALL SUBSETS</span></h2><span>Same tasks · verified returned model IDs</span></div>
+      <p class="research-copy" id="pilot-scope"></p>
+      <div class="panel"><div class="table-scroll"><table id="measured-table"><caption class="sr-only">Measured subset results with per-model latency distributions</caption><thead><tr><th>Benchmark / model</th><th>Passed</th><th>Latency distribution</th><th>p50 / p95</th><th>Error rate</th><th>Evidence</th></tr></thead><tbody></tbody></table></div></div>
+      <p class="research-copy" id="pilot-caveats"></p>
+      <p class="research-copy">Each dot is one task. Prompt benchmark latency measures API response time; Terminal-Bench measures agent execution including tools. Each row has its own scale. <a href="research/measurements.json" download>Download full evidence JSON ↗</a> · <a href="research/report.md" download>Download report ↗</a></p>
+      <details class="source-details"><summary>Hardware, settings, dataset caveats &amp; billing</summary><pre id="pilot-provenance"></pre></details>
+      <div class="section-heading"><h2>Inspect the individual results</h2><span id="pilot-count"></span></div>
+      <div class="panel"><div class="filters">
+        <label class="sr-only" for="pilot-benchmark">Benchmark</label><select id="pilot-benchmark"><option value="">All benchmarks</option></select>
+        <label class="sr-only" for="pilot-model">Model</label><select id="pilot-model"><option value="">Both models</option></select>
+        <label class="sr-only" for="pilot-outcome">Outcome</label><select id="pilot-outcome"><option value="">All results</option><option value="fail">Failures</option><option value="disagree">Models disagree</option></select>
+      </div><div class="table-scroll pilot-results-scroll"><table id="pilot-results"><caption class="sr-only">Individual measured task results</caption><thead><tr><th>Task</th><th>Model</th><th>Result</th><th>Latency</th><th>Evidence</th></tr></thead><tbody></tbody></table></div><p class="empty" id="pilot-empty" hidden>No matching results.</p></div>
+    </section>
     <section id="api-access">
       <div class="section-heading"><h2>GLM API access checks <span class="pill">NOT A BENCHMARK</span></h2><span>Requested models · live provider responses</span></div>
-      <div class="panel"><div class="table-scroll"><table id="access-table"><caption class="sr-only">Live API access checks, excluded from benchmark quality scores</caption><thead><tr><th>Requested model</th><th>Access status</th><th>Provider response</th><th>Quality score</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="panel"><div class="table-scroll"><table id="access-table"><caption class="sr-only">Live API access checks, excluded from benchmark quality scores</caption><thead><tr><th>Requested model</th><th>Access status</th><th>Route / returned model</th><th>Quality score</th></tr></thead><tbody></tbody></table></div></div>
       <p class="research-copy" id="access-note"></p>
     </section>
     <section id="references">

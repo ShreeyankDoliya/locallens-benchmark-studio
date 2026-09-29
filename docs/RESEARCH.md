@@ -2,7 +2,9 @@
 
 Reviewed 29 September 2026. [Open the research dashboard](https://shreeyankdoliya.github.io/locallens-benchmark-studio/research.html).
 
-**No scored GLM benchmark evaluation has been performed.** Two live access probes at the user-confirmed standard Z.ai endpoint were rejected with HTTP 429, provider code `1113` (insufficient balance or no resource package). Neither returned a model response or token usage. Their evidence is separate from benchmark scores in `dashboard/research/access.json`. This research track provides paper analysis, pinned upstream data, the full Terminal-Bench 2.0 task inventory, two real Docker harness controls, and clearly attributed external GLM scores. The existing mock and local Qwen benchmarks remain available on the main dashboard.
+**Live pilot completed for GLM-5.3 and GLM-5.3-Flash.** We evaluated 10 preselected tasks each from HumanEval, MBPP, GSM8K and IFEval, plus three native Terminal-Bench tasks per model. [The generated report](../dashboard/research/report.md) and [complete evidence](../dashboard/research/measurements.json) contain the measured outcomes. These small subsets cannot establish overall model superiority or reproduce the papers' full leaderboards.
+
+The user-authorized standard API route returned account error `1113`. The documented Coding Plan route worked, but `glm-5.2` was silently routed to `glm-5.3` in two checks; `glm-4.7` was routed to `glm-5.3-flash`. Explicit `glm-5.3-flash` requests returned that identity correctly. We used it as the second model and enforce exact requested/returned identity equality. No independently measured GLM-5.2 score is claimed. Seven access probes are published separately from benchmark scores. The local/mock workflow still requires no paid service.
 
 ## What the Terminal-Bench paper establishes
 
@@ -44,67 +46,99 @@ flowchart LR
   G[Published paper or vendor table] --> H[Separate reference table]
 ```
 
-## Five complementary benchmark papers
+## Five protocols actually exercised
 
-| Benchmark / paper | Evaluation population | Measure and required protocol |
+| Benchmark / paper | Pilot and deterministic scoring | What it cannot establish |
 | --- | --- | --- |
-| [Terminal-Bench](https://arxiv.org/abs/2601.11868v1), Merrill et al., 2026 | 89 tasks in version 2.0 | Agentic terminal completion; native sandbox and final-state tests |
-| [HumanEval: Evaluating Large Language Models Trained on Code](https://arxiv.org/abs/2107.03374), Chen et al., 2021 | 164 Python functions | Functional correctness; original completion prompts, hidden unit tests, pass@1 for one sample |
-| [MBPP: Program Synthesis with Large Language Models](https://arxiv.org/abs/2108.07732), Austin et al., 2021 | Original test IDs 11–510, 500 tasks | Basic Python synthesis; disclose provided tests and three-shot examples; do not substitute the sanitized split |
-| [GSM8K: Training Verifiers to Solve Math Word Problems](https://arxiv.org/abs/2110.14168), Cobbe et al., 2021 | 1,319 test questions | Arithmetic answer accuracy; fixed prompting and explicitly recorded answer extraction |
-| [IFEval: Instruction-Following Evaluation for Large Language Models](https://arxiv.org/abs/2311.07911), Zhou et al., 2023 | 541 prompts | Official verifiable constraints; strict/loose and prompt/instruction accuracy are four separate measures |
+| [Terminal-Bench](https://arxiv.org/abs/2601.11868v1) | Three resource-selected native Docker tasks (`regex-log`, `fix-git`, `openssl-selfsigned-cert`), Terminus 2, original final-state verifier | Full 89-task performance, historical scaffold parity or model-only capability |
+| [HumanEval](https://arxiv.org/abs/2107.03374) | Ten tasks; chat wrapper requests the complete Python function; original hidden tests run in a container; one completion per task | Full pass@1, production software quality or resistance to benchmark exposure |
+| [MBPP](https://arxiv.org/abs/2108.07732) | Ten original test-split tasks (IDs 11–510); three-shot examples 2, 3, 4; supplied tests; original assertions; challenge tests excluded | Full test-set performance; the original dataset contains wording/test inconsistencies |
+| [GSM8K](https://arxiv.org/abs/2110.14168) | Ten test questions, zero-shot; numeric equality after a final `####` marker | Reasoning validity, learned-verifier results or general mathematical ability |
+| [IFEval](https://arxiv.org/abs/2311.07911) | Ten exact original prompts and pinned upstream checkers; strict prompt accuracy primary, strict/loose instruction and prompt accuracy also exported | General helpfulness, semantics or unconstrained instruction following |
 
-Each card in the dashboard links its paper and official implementation and describes limitations. These are public, often heavily studied datasets: contamination and saturation matter, and high scores do not demonstrate broad intelligence or safety. In particular, function-level coding tasks do not measure long-horizon repository work.
+The four prompt subsets were selected **before inference**, by ascending SHA-256 of `locallens-pilot-v1:benchmark:id`, taking ten per benchmark. `research prepare` checks the immutable source bytes, row counts and split membership before creating `selection.json`. Terminal tasks were hand-selected for available machine resources, not randomly sampled. Both models get identical membership and prompts, one completion/trial each, temperature 1, top-p 1, enabled thinking, high reasoning effort and an 8,192-token output cap. No judge model assigns these scores. Code extraction only removes whole-response Python fences and optional MBPP delimiters; there are no model-specific repairs.
 
-The four prompt datasets were downloaded from pinned Git revisions, counted and SHA-256 checked. HumanEval reference solutions and hidden tests must remain scoring inputs; only task prompts go to inference. MBPP’s paper-style prompts intentionally expose specified tests and demonstrations, so its protocol must be handled separately. IFEval requires upstream checkers rather than substituting keyword matching. Code execution belongs in disposable sandboxes with resource limits, no credentials, no host workspace mounts and no network access during generated-code tests.
+Prompt inference uses two workers, one global request start per second, 300-second timeouts and at most two retries for transient request failures. A failed or timed-out final response counts in the denominator. Scorer infrastructure errors interrupt the run rather than generating model failures. Model responses are checkpointed before scoring, so retrying a failed scorer uses the saved response without another API call. A provider identity mismatch interrupts unscored. The runner also preserves unsuccessful/interrupted attempts; a hard kill before the generation checkpoint can still require a repeated request.
 
-The `research prepare` command creates a fixed hash-ordered pilot selection of ten eligible tasks per prompt benchmark. This is preparation only: it neither calls a model nor implements the four native scorers. Original data stay under ignored `runs/`, rather than being silently republished under our MIT license.
+HumanEval and MBPP execute in a digest-pinned Python 3.12.13 container: no network, no host mounts or credentials, read-only root, non-root UID, 512 MB memory, one CPU, 64 processes, 64 MB temporary storage, CPU/file-size limits and a 20-second wall timeout. The official HumanEval and MBPP tests are used, but the chat prompting is an explicit adaptation. A Docker failure is distinguished from a program test failure. Docker isolation is useful containment, not a proof against hostile kernel exploits.
 
-## GLM reference scores and the planned comparison
+IFEval uses the pinned upstream implementation and English `punkt_tab` data checksums. Python dependencies are in `requirements-research.txt`. Language detection/random choices are seeded. Native generation settings, selected tasks, source/scorer hashes, host runtime and image digest are immutable resume metadata. Model weights behind API aliases cannot be frozen.
 
-The dashboard includes GLM-5.3 and GLM-5.2 reference values from the [Z.ai release table](https://z.ai/blog/glm-5.3), with source date, metric and protocol notes. These vendor reports cover newer terminal benchmarks and other suites; they are not measurements on the five prepared datasets. There are no per-task traces for those reported scores in this repository, and no averaging across unrelated benchmarks.
+The Terminal-Bench run uses **Harbor 0.23.0 / Terminus 2**, one concurrent trial, one attempt, a shared **32,768-token context budget and 50-turn cap**, with native per-task timeouts and 8,192 output tokens per call. Job retries default to zero; Harbor’s LLM layer permits three call attempts with exponential waits, distinct from task repetitions. `requirements-harbor.txt` captures all installed harness packages. This constrained pilot does not use the models' advertised maximum context. A loopback gateway keeps the actual API key in host memory, provides only a random local token to Harbor, records redacted requests/responses, enforces the two confirmed model identities and limits request starts to one per second. Native agent trajectories, actual API payloads, verifier tests, rewards, task checksums, usage and timings are exported. No cloud sandbox was used.
 
-[GLM-5.3’s API documentation](https://docs.z.ai/guides/llm/glm-5.3) specifies reasoning-enabled operation. It documents different protocol endpoints, including a Coding Plan route, while its examples also show the standard API route. The key’s issuing provider and subscription/usage type must be identified before choosing an endpoint. [Published Z.ai pricing](https://docs.z.ai/guides/overview/pricing) on the review date lists GLM-5.3 and GLM-5.2 at $1.40 per million uncached input tokens and $4.40 per million output tokens. Account-specific quotas and charges still need confirmation.
+The generation and terminal jobs initially overlapped on the same account/host; load and service contention are additional timing confounders. Prompt latency is API wall time excluding scoring; terminal latency is agent execution wall time including tools but excluding setup/verifier. The dashboard plots every observed latency and reports linearly interpolated p50/p95. Ten or three observations give weak tail estimates. Do not combine rates or directly compare these different latency definitions.
 
-The next evaluation should use the same selected task IDs for both confirmed GLM model IDs, record the exact requested and returned versions, and predeclare prompt, reasoning settings and output budget. Start with a bounded pilot; label it as a subset, not a full benchmark score. Terminal tasks need a shared Terminus 2 scaffold and equal task budgets. Infrastructure errors, timeouts and model failures remain visible; repeated rollouts must not become “retry until passing.” Prefer paired per-task comparisons and disclose uncertainty instead of declaring a universal winner.
+### Results, controls and a dataset caveat
 
-**Confirmed:** standard endpoint `https://api.z.ai/api/paas/v4`, model IDs `glm-5.3` and `glm-5.2`, and permission to use them without a user-imposed spending ceiling. The optional Z.ai adapter now records usage and model aliases, with transport tests covering success and failure cases. Live probes were blocked by the provider account, not by a LocalLens budget limit. Code `1113` is terminal for a run even though its HTTP status is 429; blindly retrying it as a rate limit would waste requests. A stopped task is left unscored and resumable.
+The generated report is the authoritative aggregate: every score is recalculated from individual evidence, and it includes failures. The dashboard provides benchmark/model/failure/disagreement filters and exact prompt, response, expected result, judgment and provenance dialogs. Published vendor numbers remain in a separate external-reference section; no responses or reproductions are claimed for them.
 
-**Remaining work:** resolving account access or confirming a Coding Plan route; validating a successful live API completion; native scorer integration for HumanEval/MBPP/GSM8K/IFEval; actual GLM trials and their individual evidence exports. API pricing estimates omit unknown/retry usage and cached discounts. No GLM key has been written to Git, the website, a config file or a report. Static GitHub Pages remains a viewer, not a credential-bearing inference service. See the [API instructions](../README.md#optional-glm-api-access) for the credential-free test coverage and access-check command.
+The live prompt pilot stopped after eight saved results, then resumed to 80 without repeating completed pairs. Control checks accepted a sampled HumanEval and MBPP reference solution and rejected empty programs; an IFEval keyword control accepted and rejected the expected answers. The native `openssl-selfsigned-cert` oracle passed all six verifier tests and the no-op failed all six. Those two controls are separately labeled, not model measurements. The certificate verifier's numeric permission check is not a comprehensive permission-policy validator; controls on one task do not validate all 89 task environments.
 
-## Commands and observed controls
+**MBPP 313 is ambiguous:** its wording asks to print positive numbers, but its reference returns the first nonnegative number, and `assert pos_nos(...) == 1,2` uses `2` as the assertion message, not an expected second value. Both measured outputs failed the original tests. We retain that preselected task and flag the issue rather than removing it after seeing outcomes. This failure alone is not clean evidence of a coding defect.
 
-The following are the successful preparation and verification commands used on this machine. Repository source was inspected; only the pinned task checkout and isolated installed Harbor were executed. Docker Desktop was already running. No cloud sandbox was used.
+**GSM8K 1288 also exposes a scoring limitation:** GLM-5.3 correctly computed 2,040 minutes, equivalent to the reference 34 hours, but the question did not specify the unit. The declared numeric check marks it wrong. We preserve that strict score and explicitly identify the unit ambiguity; it is not an arithmetic failure. GSM8K final-answer matching does not validate intermediate reasoning. IFEval strict failures can penalize formatting despite otherwise useful prose. Public benchmark contamination, single samples, adapted prompts and dataset imperfections prevent universal model rankings. No confidence interval from a full published benchmark applies to these subsets.
+
+### Cost and model identity
+
+Model IDs and endpoints were checked against [Z.ai documentation](https://docs.z.ai/guides/llm/glm-5.3), but actual returned identity is the measurement label. The supplied 5.2 request was redirected; a separate 5.2 comparison requires a route that actually returns 5.2. No spending ceiling was imposed by the user. The pilot size is a declared evaluation scope, not a billing cap.
+
+The Coding Plan route records token usage. Subscription/point deductions and dollar charges are not available to this harness and are **unknown**, not zero. Standard API list prices are not substituted for an account bill. Missing/retry usage is not invented. The private raw runs and SQLite files remain ignored by Git; only explicit evidence exports are published. GitHub Pages never receives the API key or performs inference.
+
+## Reproduce the measured pilot
+
+Start with the normal README setup, Docker running, and Python 3.12. These are the commands used; the initial Terminal-Bench checkout under `runs/` was copied from the already-pinned `/tmp/locallens-terminal-bench-2`, while the public clone commands below produce the same revision independently.
 
 ```bash
-git clone --depth 1 https://github.com/harbor-framework/terminal-bench-2.git /tmp/locallens-terminal-bench-2
-git -C /tmp/locallens-terminal-bench-2 fetch --depth 1 origin 69671fbaac6d67a7ef0dfec016cc38a64ef7a77c
-git -C /tmp/locallens-terminal-bench-2 checkout --detach FETCH_HEAD
-uv venv --python 3.12 /tmp/locallens-harbor-env
-uv pip install --python /tmp/locallens-harbor-env/bin/python 'harbor==0.23.0'
-
+.venv/bin/python -m pip install -r requirements-research.txt
 .venv/bin/python -m benchmark_studio.research verify
 .venv/bin/python -m benchmark_studio.research prepare --limit 10
-.venv/bin/python -m benchmark_studio.research inspect-terminal --repo /tmp/locallens-terminal-bench-2 --output dashboard/research/terminal-tasks.json
+.venv/bin/python -m benchmark_studio.research prepare-scorers
 
-/tmp/locallens-harbor-env/bin/harbor run --path /tmp/locallens-terminal-bench-2/openssl-selfsigned-cert --agent oracle --env docker --n-concurrent 1 --n-attempts 1 --max-retries 0 --jobs-dir runs/harbor --job-name tb2-oracle-smoke
-/tmp/locallens-harbor-env/bin/harbor run --path /tmp/locallens-terminal-bench-2/openssl-selfsigned-cert --agent nop --env docker --n-concurrent 1 --n-attempts 1 --max-retries 0 --jobs-dir runs/harbor --job-name tb2-nop-smoke
-
-.venv/bin/python -m benchmark_studio.research export-controls --jobs runs/harbor/tb2-oracle-smoke runs/harbor/tb2-nop-smoke --repo /tmp/locallens-terminal-bench-2 --output dashboard/research/controls.json
-.venv/bin/python -m unittest discover -s tests -v
-PLAYWRIGHT_CHANNEL=chrome npm run test:ui
+git clone https://github.com/harbor-framework/terminal-bench-2.git runs/research/terminal-bench-2
+git -C runs/research/terminal-bench-2 checkout --detach 69671fbaac6d67a7ef0dfec016cc38a64ef7a77c
+uv venv --python 3.12 /tmp/locallens-harbor-env
+uv pip install --python /tmp/locallens-harbor-env/bin/python -r requirements-harbor.txt
+docker pull python@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36
 ```
 
-| Check | Observed result |
-| --- | --- |
-| Reference solution | 6/6 tests pass, native reward 1, no exceptions |
-| No-op | 0/6 tests pass, native reward 0, no exceptions |
-| Python suite | 37 tests pass |
-| Browser suite | 10 tests pass, including mobile research layout and evidence dialogs |
-| API inference | None; $0 API fees incurred by this research work |
+Run the prompt pilot. The first command deliberately checkpoints after eight model/task pairs; repeating without `--max-new` resumes the same immutable run. The key is entered at a hidden prompt. Do not change scorer source or model/settings while resuming.
 
-Hardware: Apple M1 Pro, 8 CPU cores, 16 GiB unified memory, macOS 26.6.2; Docker Engine 29.7.2. Docker reports 8 CPUs and 16,746,086,400 bytes of VM memory. The official certificate image is **amd64**, running on this arm64 host; emulation and environment setup affect wall time. Recorded image digest: `alexgshaw/openssl-selfsigned-cert@sha256:4c948a4e630af2435ae0a19108fc0814a946ac2fa29a512469e0fc77b38c8c12`. The task still references an upstream image tag and downloads dependencies at verification time, so even a pinned Git checkout does not freeze every dependency.
+```bash
+ZAI_BASE_URL=https://api.z.ai/api/coding/paas/v4 NLTK_DATA=runs/research/nltk_data .venv/bin/python -m benchmark_studio.research_run --run-id glm-native-pilot-v1 --image python@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36 --prompt-key --max-new 8 --output runs/glm/native-pilot.json
+ZAI_BASE_URL=https://api.z.ai/api/coding/paas/v4 NLTK_DATA=runs/research/nltk_data .venv/bin/python -m benchmark_studio.research_run --run-id glm-native-pilot-v1 --image python@sha256:229a2c5bfa27522db7815ea81f9bed70af17ccb9de9fc7ad142b1877b5830d36 --prompt-key --output runs/glm/native-pilot.json
+```
 
-Re-exporting the saved native control files reproduces `controls.json`. Re-running the task itself changes dates, generated certificates and timings. Use a new job name for a new run. Resume an interrupted existing job with `harbor jobs resume --job-path runs/harbor/JOB_NAME`; this resumes the native harness, independently of LocalLens’s SQLite prompt-run resumability.
+Run the six native terminal trials through the credential-isolating gateway:
 
-Preview with `python3 -m http.server 8000 --bind 127.0.0.1 --directory dashboard` and open `/research.html`. The normal Pages workflow publishes these static assets after tests pass. Source metadata and the original task instruction retain their upstream attribution; see [third-party notices](THIRD_PARTY.md).
+```bash
+.venv/bin/python -m benchmark_studio.harbor_gateway --harbor /tmp/locallens-harbor-env/bin/harbor --config configs/harbor-glm-pilot.json
+```
+
+If interrupted, resume through the gateway so it continues recording API evidence:
+
+```bash
+.venv/bin/python -m benchmark_studio.harbor_gateway --harbor /tmp/locallens-harbor-env/bin/harbor --resume runs/harbor/glm-terminal-pilot-v1
+```
+
+Use new run/job names and a separate gateway `--log` for an independent experiment; never retry trials until they pass. The checked-in config is for this declared six-trial pilot. Full 89-task or repeated-rollout evaluation needs separate resource planning and a new configuration.
+
+Publish the completed measurements and regenerate the report from saved evidence:
+
+```bash
+.venv/bin/python -m benchmark_studio.research_export
+.venv/bin/python -m benchmark_studio.research_export --report-only dashboard/research/measurements.json --report runs/glm/reproduced-report.md
+cmp dashboard/research/report.md runs/glm/reproduced-report.md
+.venv/bin/python -m unittest discover -s tests -v
+PLAYWRIGHT_CHANNEL=chrome npm run test:ui
+python3 -m http.server 8000 --bind 127.0.0.1 --directory dashboard
+```
+
+Open `/research.html`. The static export includes full native prompts, responses, test outcomes and agent trajectories; report regeneration verifies fingerprints and recomputes aggregates without model calls, Docker or optional scorer dependencies. It does not reexecute generated code. A fresh evaluation changes sampled responses, timestamps and latency.
+
+### Hardware and deployment
+
+Executed on Apple M1 Pro, 8 CPU cores, 16 GiB unified memory, macOS 26.6.2; Docker Engine 29.7.2 and Python 3.12.13. The Docker VM reported 8 CPUs and 16,746,086,400 bytes of memory. Official terminal images are amd64 and run under emulation on this arm64 host. Prompt inference is remote; provider compute details are unavailable. The code scorer uses the digest-pinned Python image above. Terminal task revisions are pinned, but their image tags and network-installed dependencies can still drift.
+
+For this pilot, use 16 GB RAM and roughly 20 GB free Docker disk as starting guidance, with one terminal trial at a time. This is not a proven minimum. The full 89-task set has much larger per-task resource declarations; inspect `terminal-tasks.json` before expansion. The ordinary mock workflow needs no Docker or API credentials.
+
+The existing GitHub Actions workflow tests Python and the browser before publishing only `dashboard/` to GitHub Pages. See the README for deployment commands and [third-party notices](THIRD_PARTY.md) for the selected upstream task content. The supplied PDF itself is not redistributed.

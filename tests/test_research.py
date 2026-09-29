@@ -13,12 +13,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ResearchTests(unittest.TestCase):
-    def test_catalog_separates_references_and_missing_measurements(self):
+    def test_catalog_separates_references_and_measurements(self):
         catalog = load_catalog(ROOT / "dashboard/research/catalog.json")
         self.assertEqual(len(catalog.benchmarks), 5)
-        self.assertEqual(catalog.measured_glm_runs, [])
+        self.assertEqual(catalog.measured_glm_runs, ['glm-native-pilot-v1', 'glm-terminal-pilot-v1'])
         self.assertTrue(all(s.origin in {"paper_reported", "vendor_reported"} for s in catalog.published_scores))
-        self.assertTrue(all("pending" in b.status or "not run" in b.status for b in catalog.benchmarks))
+        self.assertTrue(all("Measured pilot" in b.status for b in catalog.benchmarks))
         native = json.loads((ROOT / "dashboard/research/terminal-tasks.json").read_text())
         self.assertEqual(len(native["tasks"]), 89)
         self.assertEqual(len({t["id"] for t in native["tasks"]}), 89)
@@ -73,13 +73,21 @@ class ResearchTests(unittest.TestCase):
     def test_rejected_access_checks_have_no_quality_scores(self):
         payload = json.loads((ROOT / "dashboard/research/access.json").read_text())
         self.assertFalse(payload["benchmark_results"])
-        self.assertEqual(len(payload["results"]), 2)
-        for row in payload["results"]:
+        self.assertEqual(len(payload["results"]), 7)
+        for row in payload["results"][:2]:
             self.assertEqual(row["http_status"], 429)
             self.assertEqual(row["code"], '1113')
             self.assertIsNone(row['score'])
             self.assertIsNone(row['response'])
             self.assertIsNone(row['usage'])
+
+    def test_api_alias_checks_cannot_claim_an_independent_model(self):
+        payload = json.loads((ROOT / 'dashboard/research/access.json').read_text())
+        for row in payload['results'][2:]:
+            self.assertIsNone(row['score'])
+            self.assertEqual(row['status'] == 'available', row['model'] == row['returned_model'])
+        redirected = [r for r in payload['results'] if r['model'] == 'glm-5.2' and r['status'] == 'alias_mismatch']
+        self.assertEqual(len(redirected), 2)
 
     def test_control_export_rejects_model_runs(self):
         with tempfile.TemporaryDirectory() as temp:

@@ -29,7 +29,7 @@ flowchart LR
 | `cli.py` | Validate, run, resume, list, export and report commands |
 | `dashboard/` | Browser-only run comparison and evidence inspection, using relative static paths |
 
-The runner never passes an answer or rubric to a provider. Its small provider contract is `manifest()`, `generate(prompt, options)` and `close()`. `Generation` carries raw text, optional token counts and provider metadata. Errors carry retryability and fatal-account classifications. The factory accepts mock, Ollama and optional Z.ai. Z.ai credentials come only from the runner environment; redirects and arbitrary API endpoints are rejected. Its manifest identifies a mutable API model alias, not a weight digest. Account failures preserve the attempt, leave the task unscored, and interrupt the run. The zero-cost core does not require a paid backend.
+The original diagnostic runner never passes an answer or rubric to a provider. The research MBPP protocol intentionally includes its public example tests and three demonstration solutions; hidden HumanEval tests remain outside the model prompt. Its small provider contract is `manifest()`, `generate(prompt, options)` and `close()`. `Generation` carries raw text, optional token counts and provider metadata. Errors carry retryability and fatal-account classifications. The factory accepts mock, Ollama and optional Z.ai. Z.ai credentials come only from the runner environment; redirects and arbitrary API endpoints are rejected. Its manifest identifies a mutable API model alias, not a weight digest. Account failures preserve the attempt, leave the task unscored, and interrupt the run. The zero-cost core does not require a paid backend.
 
 ## Persistence and recovery
 
@@ -48,3 +48,26 @@ Report file writes use temporary files followed by replacement. SQLite snapshots
 ## Scope choices
 
 Pydantic and HTTPX keep validation and cancellable network behavior small and explicit. Tests use the standard Python `unittest` library; optional Playwright checks the actual browser workflow. A database service, paid API, frontend framework and hosted backend would add setup without helping this MVP. The static interface currently renders all result rows, so very large datasets will need pagination or virtualization.
+
+## Optional native research track
+
+```mermaid
+flowchart LR
+  U[Pinned upstream datasets] --> N[Research runner]
+  N --> Z[Z.ai provider]
+  Z --> CACHE[(SQLite generation checkpoint)]
+  CACHE --> CHECK[Docker code tests / numeric check / upstream IFEval]
+  CHECK --> JSON[Measured evidence export]
+  TB[Pinned terminal tasks] --> H[Harbor / Terminus 2]
+  H --> G[Loopback credential gateway]
+  G --> Z
+  H --> T[Native final-state verifier]
+  T --> JSON
+  JSON --> VIEW[Static research dashboard and report]
+```
+
+`research.py` validates the paper catalog, dataset bytes/splits, task inventory and pinned IFEval implementation. `native_scoring.py` builds the disclosed prompts and invokes original tests/constraints. `research_run.py` shares the provider and storage interfaces while caching generations before scoring in `research_responses`. A scorer interruption can resume without requesting the same completion again. Completed results remain immutable, and requested/returned identity mismatch stops the run unscored.
+
+`harbor_gateway.py` keeps the real API credential out of Harbor's environment and task containers. It authenticates loopback requests with an ephemeral local token, forwards only the two verified model IDs, and writes redacted call evidence. Harbor owns terminal environments, tool execution, trial resume and final-state verification. These traces are not converted into prompt exact-match tasks.
+
+`research_export.py` joins native trial/verifier evidence with recorded calls, rejects missing or ambiguous attribution, retains exact prompts and responses, and derives summaries. The export includes task file checksums, observed Docker image digests, dependency/config fingerprints, timings and usage. It preserves external references in a separate catalog. Report-only mode validates the evidence fingerprint and recomputes aggregates; it requires neither Docker nor credentials and does not rerun code. The static viewer renders all model text as text nodes.

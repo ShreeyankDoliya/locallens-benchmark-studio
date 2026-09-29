@@ -3,7 +3,7 @@
   "kind": "provider_access_checks",
   "benchmark_results": false,
   "recorded_at": "2026-09-29T12:01:35.513100+00:00",
-  "note": "Two live access probes at the user-confirmed endpoint. No model response or token usage returned; these are not benchmark scores. Charges are unknown, not assumed zero.",
+  "note": "The standard route rejected both requested models with code 1113. The Coding Plan route works, but glm-5.2 returned glm-5.3 (twice), and glm-4.7 returned glm-5.3-flash. Only the explicitly requested and verified glm-5.3 and glm-5.3-flash identities are used for measured scores. These seven access checks are not benchmark results.",
   "results": [
     {
       "model": "glm-5.3",
@@ -46,6 +46,171 @@
         "max_tokens": 128,
         "temperature": 1.0
       }
+    },
+    {
+      "model": "glm-5.3",
+      "checked_at": "2026-09-29T12:12:59.282642+00:00",
+      "endpoint": "https://api.z.ai/api/coding/paas/v4",
+      "prompt": "Reply with only OK.",
+      "settings": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 128,
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "low"
+      },
+      "response": "OK",
+      "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 17,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 20
+      },
+      "score": null,
+      "status": "available",
+      "returned_model": "glm-5.3",
+      "request_id": "2026092920130005c57169ed144a47",
+      "latency_ms": 2880.408167024143,
+      "identity_matches": true
+    },
+    {
+      "model": "glm-5.2",
+      "checked_at": "2026-09-29T12:13:03.233157+00:00",
+      "endpoint": "https://api.z.ai/api/coding/paas/v4",
+      "prompt": "Reply with only OK.",
+      "settings": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 128,
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "low"
+      },
+      "response": "OK",
+      "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 17,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 20
+      },
+      "score": null,
+      "status": "alias_mismatch",
+      "returned_model": "glm-5.3",
+      "request_id": "20260929201303bdc93b4dc9394a08",
+      "latency_ms": 2498.399041010998,
+      "identity_matches": false
+    },
+    {
+      "model": "glm-5.2",
+      "checked_at": "2026-09-29T12:14:33.095048+00:00",
+      "endpoint": "https://api.z.ai/api/coding/paas/v4",
+      "prompt": "Reply with only OK.",
+      "settings": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 128,
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "low"
+      },
+      "response": "OK",
+      "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 17,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 20
+      },
+      "score": null,
+      "status": "alias_mismatch",
+      "returned_model": "glm-5.3",
+      "request_id": "202609292014334edaa23bab5b427e",
+      "latency_ms": 2924.249125062488,
+      "identity_matches": false
+    },
+    {
+      "model": "glm-4.7",
+      "checked_at": "2026-09-29T12:14:37.027943+00:00",
+      "endpoint": "https://api.z.ai/api/coding/paas/v4",
+      "prompt": "Reply with only OK.",
+      "settings": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 128,
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "low"
+      },
+      "response": "OK",
+      "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 17,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 20
+      },
+      "score": null,
+      "status": "alias_mismatch",
+      "returned_model": "glm-5.3-flash",
+      "request_id": "2026092920143716d74b7cbd864679",
+      "latency_ms": 1516.9337920378894,
+      "identity_matches": false
+    },
+    {
+      "model": "glm-5.3-flash",
+      "checked_at": "2026-09-29T12:20:35.640374+00:00",
+      "endpoint": "https://api.z.ai/api/coding/paas/v4",
+      "prompt": "Reply with only OK.",
+      "settings": {
+        "temperature": 1.0,
+        "top_p": 1.0,
+        "max_tokens": 128,
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "low"
+      },
+      "response": "OK",
+      "usage": {
+        "completion_tokens": 3,
+        "completion_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "prompt_tokens": 17,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "total_tokens": 20
+      },
+      "score": null,
+      "status": "available",
+      "returned_model": "glm-5.3-flash",
+      "request_id": "20260929202036a798d91bdfbf431f",
+      "latency_ms": 14308.00416704733,
+      "identity_matches": true
     }
   ]
 }

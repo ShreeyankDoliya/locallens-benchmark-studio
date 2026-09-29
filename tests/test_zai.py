@@ -80,3 +80,23 @@ class ZaiTests(unittest.IsolatedAsyncioTestCase):
         for options in [{'thinking':{'type':'disabled'}},{'messages':[]},{'max_tokens':0},{'api_key':'bad'}]:
             with self.assertRaises(ValidationError):
                 ModelConfig(id='glm',provider='zai',model='glm-5.3',options=options)
+
+
+class AccessProbeTests(unittest.IsolatedAsyncioTestCase):
+    async def test_successful_http_completion_with_wrong_model_is_not_available(self):
+        from benchmark_studio.api_check import check_models
+        from benchmark_studio.providers import Generation
+        from unittest.mock import AsyncMock
+        class Provider:
+            endpoint='https://api.z.ai/api/coding/paas/v4'
+            def __init__(self, config): pass
+            async def generate(self, prompt, settings):
+                return Generation('OK', 17, 3, {'returned_model':'glm-5.3', 'usage':{'total_tokens':20}})
+            async def close(self): pass
+        with patch('benchmark_studio.api_check.ZaiProvider', Provider), patch('benchmark_studio.api_check.asyncio.sleep', new=AsyncMock()):
+            result=await check_models(['glm-5.2'])
+        row=result['results'][0]
+        self.assertEqual(row['status'],'alias_mismatch')
+        self.assertFalse(row['identity_matches'])
+        self.assertIsNone(row['score'])
+        self.assertFalse(result['benchmark_results'])

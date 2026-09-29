@@ -4,7 +4,7 @@
 
 [Live dashboard](https://ShreeyankDoliya.github.io/locallens-benchmark-studio/) · [Methodology](docs/METHODOLOGY.md) · [Architecture](docs/ARCHITECTURE.md) · [Verification](docs/VERIFICATION.md)
 
-[Research dashboard](https://shreeyankdoliya.github.io/locallens-benchmark-studio/research.html) · [Terminal-Bench paper analysis and five-benchmark plan](docs/RESEARCH.md)
+[Research dashboard](https://shreeyankdoliya.github.io/locallens-benchmark-studio/research.html) · [Terminal-Bench analysis and five-benchmark pilot](docs/RESEARCH.md) · [Research dashboard preview](docs/research-dashboard.png)
 
 LocalLens runs a versioned set of tasks against local models, saves the evidence in SQLite, and publishes portable JSON reports to a static dashboard. The complete mock workflow needs no model download, API key, cloud account, paid service, or credit card. Local model inference uses Ollama on your own computer.
 
@@ -22,40 +22,34 @@ The GitHub Pages site **only displays published results**. Evaluations run local
 - Model/category pass rates, p50/p90/p95 latency, error rate, perturbation consistency, disagreement filters, and optional token-based cost estimates.
 - Static run comparison, searchable failure inspection, JSON downloads, Markdown reports, and GitHub Pages deployment.
 - Research catalog covering Terminal-Bench 2.0, HumanEval, MBPP, GSM8K and IFEval, with pinned data sources and explicit protocol limits.
-- Source-linked external GLM reference scores, the complete 89-task Terminal-Bench inventory, and real oracle/no-op Docker controls. **Scored GLM benchmark evaluations have not run**; these external scores are labeled separately from our measurements.
+- Source-linked external GLM reference scores, the complete 89-task Terminal-Bench inventory, and real oracle/no-op Docker controls. **Measured GLM-5.3 and GLM-5.3-Flash pilots** across all five benchmark protocols, with external scores kept separate.
 
-The research track keeps the original zero-cost workflow intact. The optional Z.ai adapter supports remote GLM requests, but the live access checks were rejected with provider code `1113` (insufficient balance or no resource package). No GLM quality scores have been measured. For research data validation and credential-free preparation:
+The optional research track evaluates remote GLM models through a separately configured Z.ai account. It leaves the zero-cost local/mock workflow intact. [Open the measured research dashboard](https://shreeyankdoliya.github.io/locallens-benchmark-studio/research.html) for 80 prompt results and six native terminal trials, their exact prompts, responses, judgments and latency distributions. These are **small subsets**, not full benchmark or overall model rankings.
 
-```bash
-.venv/bin/python -m benchmark_studio.research verify
-.venv/bin/python -m benchmark_studio.research prepare --limit 10
-```
+## Optional GLM research evaluation
 
-Preparation downloads the four prompt datasets at pinned revisions, verifies hashes and splits, and saves a repeatable task selection under `runs/research/sources`. It does not perform inference or replace the official scorers. The [research analysis](docs/RESEARCH.md) contains exact Docker control commands, observed results, the remaining GLM integration work, and hardware limitations.
+Our standard-endpoint probes (`https://api.z.ai/api/paas/v4`) returned account error `1113`. The documented Coding Plan route (`https://api.z.ai/api/coding/paas/v4`) worked. However, requests for `glm-5.2` returned **`glm-5.3`**, twice. We therefore evaluated verified `glm-5.3` and `glm-5.3-flash` identities; **there is no measured GLM-5.2 score**. External vendor GLM-5.2 references remain clearly labeled. API aliases are mutable, not pinned weights.
 
-## Optional GLM API access
-
-The explicitly configured endpoint is `https://api.z.ai/api/paas/v4`, with model IDs `glm-5.3` and `glm-5.2`. Both use enabled reasoning and a recorded effort setting. Model IDs are mutable API aliases, not pinned weight digests. Provider hardware is unavailable; response time includes networking.
-
-Check access using a hidden prompt (the key is not saved):
+Check access with a hidden key prompt, without saving the key:
 
 ```bash
-.venv/bin/python -m benchmark_studio.api_check --prompt-key --output runs/glm/access.json
+ZAI_BASE_URL=https://api.z.ai/api/coding/paas/v4 .venv/bin/python -m benchmark_studio.api_check --models glm-5.3 glm-5.3-flash --prompt-key --output runs/glm/access.json
 ```
 
-This sends one short request per model, has no automatic retries, records usage when returned, and exits with status 2 if either check fails. It is not a benchmark. The two live checks on 2026-09-29 returned HTTP 429 / code 1113; they are shown separately in the research dashboard. A Coding Plan subscription can require a different documented endpoint from the standard API. Confirm your account's route before setting `ZAI_BASE_URL`; the adapter only permits the two official Z.ai routes and never follows redirects.
+A successful connectivity check is not a quality score. Alias mismatches and account errors are recorded explicitly. The native research runner refuses to label a response with a different returned model identity. Keys are read from `ZAI_API_KEY` or a hidden terminal prompt and never belong in dashboard files or Git. Provider hardware is unknown; API timing includes networking. Coding Plan usage is recorded in tokens; subscription charges are unknown, not reported as zero.
 
-After access works, set `ZAI_API_KEY` in your shell environment and run the original **20-task LocalLens diagnostic**, using the existing checkpoint/export workflow:
+The complete setup, Docker isolation, paper analysis and **exact five-benchmark execution commands** are in [docs/RESEARCH.md](docs/RESEARCH.md#reproduce-the-measured-pilot). Python 3.12 and Docker are recommended for this optional track; a separate Harbor environment avoids dependency conflicts. Native scorer dependencies are pinned in `requirements-research.txt`; upstream data, IFEval code and tokenizer files have checksum verification.
+
+Reproduce the published report **without an API key, Docker or inference**:
 
 ```bash
-export ZAI_BASE_URL=https://api.z.ai/api/paas/v4
-# ZAI_API_KEY must already be set in this shell; keep its value out of commands and Git.
-.venv/bin/llm-bench run --config configs/zai.json --run-id glm-diagnostic --max-tasks 2
-.venv/bin/llm-bench run --run-id glm-diagnostic --resume
-.venv/bin/llm-bench export --run-id glm-diagnostic --output dashboard/data
+.venv/bin/python -m benchmark_studio.research_export --report-only dashboard/research/measurements.json --report runs/glm/reproduced-report.md
+cmp dashboard/research/report.md runs/glm/reproduced-report.md
 ```
 
-This command does **not** evaluate Terminal-Bench, HumanEval, MBPP, GSM8K or IFEval. Their native scorer/agent integrations are separate research work. The Z.ai adapter is covered by simulated transport tests, including successful responses, request settings, token usage, credential redaction and error classification; a successful live completion has not yet been validated. Account failures stop the run without scoring the affected task, while preserving its failed attempt for resume. Temporary rate limits use the configured bounded retries. Cost estimates use recorded token counts and configured prices, do not apply cached-input discounts, and exclude unreported usage or retry charges; they are not a billing statement or spending limit.
+This verifies the evidence fingerprint and recalculates aggregates from individual saved judgments. It does not reexecute generated programs. Fresh inference can differ because model aliases, sampling, remote service load and terminal dependencies can change.
+
+`configs/zai.json` is a separate example for the original 20-task diagnostic, not a five-benchmark harness. Its requested 5.2 alias is unsuitable for an independent comparison on the observed Coding Plan account; change the model IDs after checking returned identities. Deterministic research scorers and native Harbor trials use their own recorded protocols.
 
 ## Quick start: no models or API keys
 
@@ -111,7 +105,7 @@ llm-bench export --run-id local-qwen-01 --output dashboard/data
 python -m http.server 8000 --bind 127.0.0.1 --directory dashboard
 ```
 
-`OLLAMA_HOST` is optional and defaults to the address above. Only loopback HTTP origins are accepted. The adapter rejects cloud-backed model metadata. `.env.example` is a reference; the CLI reads environment variables and does not automatically load dotenv files. No credentials are used or stored by either MVP adapter. Future credentialed adapters should read secrets from environment variables and exclude them from manifests.
+`OLLAMA_HOST` is optional and defaults to the address above. Only loopback HTTP origins are accepted. The adapter rejects cloud-backed model metadata. `.env.example` is a reference; the CLI reads environment variables and does not automatically load dotenv files. No credentials are used or stored by either MVP adapter. The optional Z.ai adapter reads its credentials from the environment and excludes them from manifests.
 
 The local configuration uses temperature 0, seed 42, a 2,048-token context, and a 256-token output cap for both models, with one request at a time. The runner uses `/api/generate` with Ollama's native model template, stores that template, and records available usage and timing fields. Model tags are mutable, so the actual local digest is captured and checked on resume. Do not replace model weights while a run is active.
 
@@ -219,10 +213,10 @@ docs/                  architecture, methodology, verification, screenshot
 
 ## Boundaries and next steps
 
-This is a small diagnostic benchmark, not a general leaderboard. Six perturbation pairs are too few to establish robust invariance. Code tasks trace short snippets; no generated code is executed. Exact checks can penalize otherwise correct explanations; normalized checks only relax case, Unicode compatibility and whitespace. Different native model templates, cold starts, host load, and server caching affect comparisons. Temperature 0 and a seed do not guarantee bitwise reproducible inference.
+This is a small diagnostic benchmark, not a general leaderboard. Six perturbation pairs are too few to establish robust invariance. The original diagnostic code tasks trace short snippets. The optional HumanEval/MBPP research track executes generated code only in restricted, disposable Docker containers; Terminal-Bench uses native Docker environments. Exact checks can penalize otherwise correct explanations; normalized checks only relax case, Unicode compatibility and whitespace. Different native model templates, cold starts, host load, and server caching affect comparisons. Temperature 0 and a seed do not guarantee bitwise reproducible inference.
 
 Unknown usage and costs stay null. Configurable `input_per_million` and `output_per_million` rates estimate observed token usage only; they do not price local energy or missing retry usage. Provider errors count as failures. Incomplete runs show completed and planned counts, and their provisional rates should not be treated as full-run results.
 
-Optional LLM judging, semantic rubrics, native research-benchmark scorers, additional API providers, repeated-trial confidence intervals, controlled warm-up schedules, and large-dataset pagination are future extensions. The optional Z.ai adapter exists; successful live inference remains unverified because the account-access probes were rejected. Judge-based scores must have a separate score kind and must never be merged silently into deterministic scores. The zero-cost MVP does not require any of those extensions.
+Optional LLM judging, semantic rubrics, additional API providers, full-dataset research runs, repeated-trial confidence intervals, controlled warm-up schedules, and large-dataset pagination are future extensions. The optional Z.ai adapter and five native research protocols have been exercised in a small live pilot. Judge-based scores must have a separate score kind and must never be merged silently into deterministic scores. The zero-cost MVP does not require any of those extensions.
 
 MIT licensed. Created by **Shreeyank Doliya**.

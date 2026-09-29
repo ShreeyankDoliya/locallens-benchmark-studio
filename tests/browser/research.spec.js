@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 test('research references cannot be confused with measured GLM runs', async ({ page }) => {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/research.html');
-  await expect(page.locator('#research-status')).toContainText('No scored GLM evaluations yet');
-  await expect(page.locator('#access-table tbody tr')).toHaveCount(2);
+  await expect(page.locator('#research-status')).toContainText('Measured pilot');
+  await expect(page.locator('#access-table tbody tr')).toHaveCount(7);
   await expect(page.locator('#access-table')).toContainText('1113');
   await expect(page.locator('#access-table')).toContainText('Not scored');
   await expect(page.locator('#reference-table tbody tr')).toHaveCount(6);
@@ -41,4 +41,36 @@ test('research page fits mobile and handles missing evidence', async ({ page }) 
   await page.route('**/research/catalog.json', r => r.fulfill({status:404,body:'Missing'}));
   await page.reload();
   await expect(page.locator('#research-status')).toContainText('HTTP 404');
+});
+
+test('measured pilot filters failures and exposes exact evidence', async ({ page }) => {
+  await page.goto('/research.html');
+  await expect(page.locator('#measured-table tbody tr')).toHaveCount(10);
+  await expect(page.locator('#pilot-results tbody tr')).toHaveCount(86);
+  await page.locator('#pilot-benchmark-trigger').click();
+  await page.locator('#pilot-benchmark-listbox').getByRole('option', {name:'GSM8K', exact:true}).click();
+  await page.locator('#pilot-outcome-trigger').click();
+  await page.locator('#pilot-outcome-listbox').getByRole('option', {name:'Models disagree', exact:true}).click();
+  await expect(page.locator('#pilot-results tbody tr')).toHaveCount(2);
+  await page.locator('#pilot-outcome-trigger').click();
+  await page.locator('#pilot-outcome-listbox').getByRole('option', {name:'Failures', exact:true}).click();
+  await expect(page.locator('#pilot-results tbody tr')).toHaveCount(1);
+  await page.getByRole('button', {name:'Inspect gsm8k 1288 glm-5.3', exact:true}).click();
+  await expect(page.getByRole('dialog')).toContainText('Exact prompt');
+  await expect(page.getByRole('dialog')).toContainText('2040');
+  await expect(page.getByRole('dialog')).toContainText('Expected result');
+  await expect(page.getByRole('dialog')).toContainText('Recorded evidence');
+});
+
+test('measured output is rendered as text, never executable HTML', async ({ page }) => {
+  await page.route('**/research/measurements.json', async route => {
+    const data=await (await route.fetch()).json();
+    data.results[0].response='<img src=x onerror="window.__unsafe=true">';
+    await route.fulfill({json:data});
+  });
+  await page.goto('/research.html');
+  await page.locator('#pilot-results button').first().click();
+  await expect(page.getByRole('dialog')).toContainText('<img src=x');
+  expect(await page.evaluate(()=>window.__unsafe)).toBeUndefined();
+  await expect(page.getByRole('dialog').locator('img')).toHaveCount(0);
 });

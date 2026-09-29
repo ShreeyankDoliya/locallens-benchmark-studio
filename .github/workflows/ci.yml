@@ -32,6 +32,8 @@ jobs:
       - run: cmp runs/ci-export/ci-smoke.md runs/ci-report.md
       - run: llm-bench report dashboard/data/mock-demo.json --output runs/published-report.md
       - run: cmp dashboard/data/mock-demo.md runs/published-report.md
+      - run: python -m benchmark_studio.research_export --report-only dashboard/research/measurements.json --report runs/research-report.md
+      - run: cmp dashboard/research/report.md runs/research-report.md
   browser:
     runs-on: ubuntu-latest
     steps:

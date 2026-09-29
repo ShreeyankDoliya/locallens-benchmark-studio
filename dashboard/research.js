@@ -21,16 +21,17 @@ function detail(title, sections) {
 $('#close-research-dialog').addEventListener('click', () => $('#research-dialog').close());
 
 try {
-  const [catalog, inventory, controls, access] = await Promise.all([json('research/catalog.json'), json('research/terminal-tasks.json'), json('research/controls.json'), json('research/access.json')]);
+  const [catalog, inventory, controls, access, measured] = await Promise.all([json('research/catalog.json'), json('research/terminal-tasks.json'), json('research/controls.json'), json('research/access.json'), json('research/measurements.json')]);
   if (catalog.schema_version !== 1 || inventory.tasks.length !== 89 || controls.kind !== 'harness_controls') throw new Error('Unsupported research evidence');
   $('#research-status').textContent = catalog.evaluation_status;
   $('#reviewed-on').textContent = `Sources reviewed ${catalog.reviewed_on}`;
-  const cards = [['Research benchmarks', catalog.benchmarks.length, 'Distinct papers and evaluation protocols'], ['Native terminal tasks', inventory.tasks.length, 'Pinned release · file hashes recorded'], ['Measured GLM runs', catalog.measured_glm_runs.length, 'No scores · provider access blocked'], ['Local harness controls', controls.results.length, 'Reference solution + no-op baseline']];
+  const cards = [['Research benchmarks', catalog.benchmarks.length, 'Distinct papers and evaluation protocols'], ['Native terminal tasks', inventory.tasks.length, 'Pinned release · file hashes recorded'], ['Measured GLM runs', catalog.measured_glm_runs.length, 'Two saved jobs · inspectable results'], ['Local harness controls', controls.results.length, 'Reference solution + no-op baseline']];
   $('#research-metrics').replaceChildren(...cards.map(([name, value, sub]) => { const c = el('div', null, 'metric'); c.append(el('div', name, 'metric-label'), el('div', value, 'metric-value'), el('div', sub, 'metric-sub')); return c; }));
+  renderMeasured(measured);
   if (access.kind !== 'provider_access_checks' || access.benchmark_results !== false) throw new Error('Access checks must not be benchmark scores');
   for (const check of access.results) {
     const row = el('tr');
-    row.append(el('td', check.model, 'task-id'), el('td', check.status, 'mono'), el('td', `HTTP ${check.http_status} · code ${check.code}`, 'mono'), el('td', 'Not scored', 'subtle'));
+    row.append(el('td', check.model, 'task-id'), el('td', check.status, 'mono'), el('td', `${check.endpoint.includes('/coding/') ? 'Coding Plan' : 'Standard'} · ${check.returned_model || (check.code ? `HTTP ${check.http_status} / ${check.code}` : 'unknown')}`, 'mono'), el('td', 'Not scored', 'subtle'));
     $('#access-table tbody').append(row);
   }
   const accessDownload = el('a', 'Download access evidence ↗'); accessDownload.href = 'research/access.json'; accessDownload.download = 'access.json';
@@ -83,3 +84,47 @@ try {
   $('#source-pins').textContent = JSON.stringify({ terminal_bench_revision: inventory.revision, datasets: catalog.sources }, null, 2);
   enhanceSelects(); refreshSelects(); tasks();
 } catch (error) { $('#research-status').className = 'notice error'; $('#research-status').textContent = `Research evidence could not load: ${error.message}. Serve the dashboard over HTTP.`; }
+
+function renderMeasured(data) {
+  if (data.kind !== 'measured_research_pilot' || data.origin !== 'measured') throw new Error('Expected measured evidence');
+  $('#pilot-scope').textContent = data.scope + ' ' + data.model_identity_note;
+  $('#pilot-caveats').textContent = 'Interpretation notes: ' + data.dataset_notes.join(' ');
+  $('#pilot-provenance').textContent = JSON.stringify({hardware: data.native_run.snapshot.hardware, settings: data.native_run.snapshot.settings, terminal: data.terminal_run, dataset_notes: data.dataset_notes, billing: data.billing, evidence_sha256: data.evidence_sha256}, null, 2);
+  const labels = Object.fromEntries(data.summary.map(s => [s.benchmark, s.label]));
+  function inspect(r) {
+    detail(`${labels[r.benchmark]} · ${r.task_id} · ${r.model}`, [
+      ['Measured result', `${r.passed ? 'PASS' : 'FAIL'} · ${r.judgment.method}. ${r.protocol}`],
+      [r.benchmark === 'terminal-bench' ? 'Task instruction (full model requests in recorded evidence)' : 'Exact prompt', r.prompt], ['Model response / agent trajectory', r.response ?? 'No response'],
+      ['Expected result', r.expected], ['Judgment and scoring explanation', r.judgment],
+      ['Dataset / interpretation caveat', r.dataset_caveat || 'No task-specific caveat recorded; general benchmark limitations still apply.'],
+      ['Recorded evidence', {error:r.error, input_tokens:r.input_tokens, output_tokens:r.output_tokens, latency_ms:r.latency_ms, latency_kind:r.latency_kind, source_revision:r.source_revision, ...r.evidence}]
+    ]);
+  }
+  for (const s of data.summary) {
+    const tr = el('tr'), name = el('td'), action = el('td'), button = el('button', 'Inspect protocol ↗', 'inspect-button');
+    name.append(el('div', s.label, 'task-id'), el('div', s.model, 'variant'));
+    if (s.benchmark === 'ifeval') name.append(el('div', 'strict prompt accuracy', 'variant'));
+    button.setAttribute('aria-label', `Inspect ${s.label} ${s.model} protocol`);
+    button.addEventListener('click', () => detail(`${s.label} · ${s.model}`, [['Measured subset', `${s.passed}/${s.completed} passed, ${s.errors} errors. One completion/trial per task. No universal model ranking.`], ['Protocol', data.results.find(r => r.benchmark === s.benchmark && r.model === s.model).protocol], ['Aggregate metrics', s], ['Generation settings', data.native_run.snapshot.settings], ['Billing', data.billing]]));
+    action.append(button);
+    const plotCell = el('td'), plot = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    plot.setAttribute('viewBox','0 0 160 28'); plot.setAttribute('class','latency-dots'); plot.setAttribute('role','img');
+    const times = s.latency_ms.samples, max = Math.max(...times, 1);
+    plot.setAttribute('aria-label', `${s.completed} task latencies, 0 to ${(max/1000).toFixed(1)} seconds; ${s.latency_kind}`);
+    const line = document.createElementNS(plot.namespaceURI,'line'); for (const [k,v] of Object.entries({x1:5,x2:155,y1:14,y2:14})) line.setAttribute(k,v); plot.append(line);
+    for (const t of times) { const dot=document.createElementNS(plot.namespaceURI,'circle'); dot.setAttribute('cx',5+150*t/max); dot.setAttribute('cy',14); dot.setAttribute('r',3); const title=document.createElementNS(plot.namespaceURI,'title'); title.textContent=`${(t/1000).toFixed(2)} seconds`; dot.append(title); plot.append(dot); }
+    plotCell.append(plot);
+    const timing = s.latency_ms.p50 == null ? 'unknown' : `${(s.latency_ms.p50/1000).toFixed(1)} / ${(s.latency_ms.p95/1000).toFixed(1)} s`;
+    tr.append(name, el('td', `${s.passed}/${s.completed} · ${(s.pass_rate*100).toFixed(0)}%`, 'mono'), plotCell, el('td',timing,'mono'), el('td', `${(s.error_rate*100).toFixed(0)}%`, 'mono'),action); $('#measured-table tbody').append(tr);
+  }
+  for (const [id, values] of [['pilot-benchmark', Object.keys(labels)], ['pilot-model', [...new Set(data.results.map(r=>r.model))]]]) {
+    for (const value of values) { const o=el('option', labels[value] || value); o.value=value; $('#'+id).append(o); }
+  }
+  function draw() {
+    const rows=data.results.filter(r => (!$('#pilot-benchmark').value || r.benchmark === $('#pilot-benchmark').value) && (!$('#pilot-model').value || r.model === $('#pilot-model').value) && (!$('#pilot-outcome').value || ($('#pilot-outcome').value === 'fail' ? !r.passed : r.disagreement)));
+    $('#pilot-count').textContent=`${rows.length} / ${data.results.length} results`; $('#pilot-empty').hidden=rows.length>0;
+    $('#pilot-results tbody').replaceChildren(...rows.map(r => {const tr=el('tr'), action=el('td'), button=el('button','Inspect result ↗','inspect-button'); button.setAttribute('aria-label',`Inspect ${r.benchmark} ${r.task_id} ${r.model}`); button.addEventListener('click',()=>inspect(r)); action.append(button); tr.append(el('td',`${labels[r.benchmark]} · ${r.task_id}`,'task-id'),el('td',r.model,'mono'),el('td',r.passed?'PASS':'FAIL',r.passed?'pilot-pass':'pilot-fail'),el('td',r.latency_ms == null ? 'unknown' : `${(r.latency_ms/1000).toFixed(1)} s`,'mono'),action);return tr;}));
+  }
+  for (const id of ['pilot-benchmark','pilot-model','pilot-outcome']) $('#'+id).addEventListener('change',draw);
+  draw();
+}

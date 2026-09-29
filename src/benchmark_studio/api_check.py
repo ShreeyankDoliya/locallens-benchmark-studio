@@ -29,6 +29,9 @@ async def check_models(models: list[str]) -> dict:
                 generation = await provider.generate(row["prompt"], settings)
             row.update(status="available", response=generation.text, usage=generation.metadata.get("usage"),
                        returned_model=generation.metadata.get("returned_model"), request_id=generation.metadata.get("request_id"))
+            row['identity_matches'] = row['returned_model'] == model
+            if not row['identity_matches']:
+                row['status'] = 'alias_mismatch'
         except ProviderError as exc:
             row.update(status="blocked" if exc.fatal else "error", error=str(exc), code=exc.code, retryable=exc.retryable)
         except TimeoutError:
