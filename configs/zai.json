@@ -1,0 +1,26 @@
+{
+  "name": "GLM 5.3 vs 5.2 API diagnostic",
+  "models": [
+    {
+      "id": "glm-5.3",
+      "provider": "zai",
+      "model": "glm-5.3",
+      "options": {"temperature": 1.0, "top_p": 1.0, "max_tokens": 8192, "thinking": {"type": "enabled"}, "reasoning_effort": "high"},
+      "input_per_million": 1.4,
+      "output_per_million": 4.4
+    },
+    {
+      "id": "glm-5.2",
+      "provider": "zai",
+      "model": "glm-5.2",
+      "options": {"temperature": 1.0, "top_p": 1.0, "max_tokens": 8192, "thinking": {"type": "enabled"}, "reasoning_effort": "high"},
+      "input_per_million": 1.4,
+      "output_per_million": 4.4
+    }
+  ],
+  "concurrency": 1,
+  "requests_per_second": 1.0,
+  "timeout_seconds": 300.0,
+  "retries": 2,
+  "hardware_notes": "Remote Z.ai inference; client timing includes network latency. Record client hardware automatically. Provider hardware and immutable weight revisions are unavailable. Prices are estimates from Z.ai documentation reviewed 2026-09-29; cached-input discounts are not applied. This config evaluates the original LocalLens diagnostic dataset, not Terminal-Bench or the other research datasets."
+}

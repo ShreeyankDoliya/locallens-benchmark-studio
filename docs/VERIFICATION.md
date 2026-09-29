@@ -2,6 +2,8 @@
 
 Research extension: **37 Python tests and 10 browser tests pass**. The official Terminal-Bench certificate task passed all six tests with its reference solution and failed all six with a no-op agent. These are harness controls, not model scores. See [the research verification commands and limitations](RESEARCH.md#commands-and-observed-controls). No GLM API requests were sent.
 
+API follow-up: **44 Python tests and 11 browser tests pass**. The mock regression checkpointed after 7 results, resumed to 40, and its regenerated report matched byte-for-byte. Two short live probes were subsequently sent to the user-confirmed Z.ai standard endpoint, one for each GLM model. Both returned HTTP 429 / code 1113, with no completion or usage. These probes are excluded from benchmark scores. The new adapter's simulated transport tests verify successful response handling, token recording, key redaction, endpoint restrictions and the distinction between rate limits and account failures. A runner regression proves account errors stop without scoring a task and that the same task can resume successfully. The dashboard distinguishes remote API timing/cost from local inference.
+
 Verified on 2026-09-29 using macOS arm64, 8 logical CPUs, 16 GiB RAM, Python 3.12.13 and the installed Google Chrome browser. Mock requests do not use the GPU. Automatic host details and UTC timestamps are included in each JSON report.
 
 ## Commands executed
@@ -62,7 +64,7 @@ These timings reflect **scripted sleeps plus runtime overhead**, not model infer
 
 Ollama 0.34.4 was subsequently installed on this host and both configured open-weight models were evaluated successfully. The adapter also has tests for metadata, request payloads, error codes, missing token usage, malformed responses and rejection of remote/cloud configurations.
 
-LLM judges and paid providers are future extensions. GPU details and power conditions are manual notes. There are no statistical confidence intervals, controlled warm-up runs, generated-code sandbox, or large-table pagination. The site publishes evidence only and cannot initiate local evaluations.
+LLM judges and native research-benchmark scorers remain future extensions. The optional Z.ai provider was added later; its live access checks were rejected, and successful response handling is tested with simulated transports. GPU details and power conditions are manual notes. There are no computed statistical confidence intervals, controlled warm-up runs, or large-table pagination. The site publishes evidence only and cannot initiate local evaluations.
 
 
 ## Real local-model verification

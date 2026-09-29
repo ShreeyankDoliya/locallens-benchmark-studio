@@ -21,7 +21,7 @@ flowchart LR
 | Module | Responsibility |
 |---|---|
 | `models.py` | Pydantic input contracts, dataset/group validation, canonical serialization and fingerprints |
-| `providers.py` | Provider protocol, typed generation, scripted mock and Ollama HTTP client |
+| `providers.py` | Provider protocol, typed generation, mock, Ollama and optional Z.ai clients |
 | `runner.py` | Snapshot creation, manifest preflight, global rate limiter, bounded async workers, timeouts and retries |
 | `storage.py` | SQLite schema, OS writer lock, run state, atomic attempt/result checkpoints and crash recovery |
 | `scoring.py` | Exact, normalized and strict JSON checks with explicit score kind/version |
@@ -29,7 +29,7 @@ flowchart LR
 | `cli.py` | Validate, run, resume, list, export and report commands |
 | `dashboard/` | Browser-only run comparison and evidence inspection, using relative static paths |
 
-The runner never passes an answer or rubric to a provider. Its small provider contract is `manifest()`, `generate(prompt, options)` and `close()`. `Generation` carries raw text, optional token counts and provider metadata. Errors carry a retryability classification. The factory currently accepts only mock and Ollama; another backend would add a config provider type and factory case. A paid backend is unnecessary for the core workflow.
+The runner never passes an answer or rubric to a provider. Its small provider contract is `manifest()`, `generate(prompt, options)` and `close()`. `Generation` carries raw text, optional token counts and provider metadata. Errors carry retryability and fatal-account classifications. The factory accepts mock, Ollama and optional Z.ai. Z.ai credentials come only from the runner environment; redirects and arbitrary API endpoints are rejected. Its manifest identifies a mutable API model alias, not a weight digest. Account failures preserve the attempt, leave the task unscored, and interrupt the run. The zero-cost core does not require a paid backend.
 
 ## Persistence and recovery
 

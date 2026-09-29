@@ -31,9 +31,23 @@ class Task(StrictModel):
         return self
 
 
+class ZaiOptions(StrictModel):
+    temperature: float = Field(default=1.0, ge=0, le=2)
+    top_p: float = Field(default=1.0, gt=0, le=1)
+    max_tokens: int = Field(default=8192, ge=1, le=128000)
+    thinking: dict[str, Literal["enabled"]] = Field(default_factory=lambda: {"type": "enabled"})
+    reasoning_effort: Literal["low", "high", "max"] = "high"
+
+    @model_validator(mode="after")
+    def thinking_required(self):
+        if self.thinking != {"type": "enabled"}:
+            raise ValueError("Z.ai comparison requires thinking.type=enabled")
+        return self
+
+
 class ModelConfig(StrictModel):
     id: str = Field(pattern=r"^[a-z0-9][a-z0-9_.-]*$")
-    provider: Literal["mock", "ollama"]
+    provider: Literal["mock", "ollama", "zai"]
     model: str = Field(min_length=1)
     options: dict[str, Any] = Field(default_factory=lambda: {"temperature": 0, "seed": 42, "num_predict": 256, "num_ctx": 2048})
     input_per_million: float | None = Field(default=None, ge=0)
@@ -43,6 +57,8 @@ class ModelConfig(StrictModel):
     def pricing_pair(self) -> ModelConfig:
         if (self.input_per_million is None) != (self.output_per_million is None):
             raise ValueError("provide both input and output prices or neither")
+        if self.provider == "zai":
+            self.options = ZaiOptions.model_validate(self.options).model_dump()
         return self
 
 

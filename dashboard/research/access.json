@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "kind": "provider_access_checks",
+  "benchmark_results": false,
+  "recorded_at": "2026-09-29T12:01:35.513100+00:00",
+  "note": "Two live access probes at the user-confirmed endpoint. No model response or token usage returned; these are not benchmark scores. Charges are unknown, not assumed zero.",
+  "results": [
+    {
+      "model": "glm-5.3",
+      "endpoint": "https://api.z.ai/api/paas/v4",
+      "http_status": 429,
+      "code": "1113",
+      "error": "Insufficient balance or no resource package. Please recharge.",
+      "status": "blocked",
+      "response": null,
+      "usage": null,
+      "score": null,
+      "latency_ms": 1069.7456250200048,
+      "prompt": "Reply with only OK.",
+      "settings": {
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "low",
+        "max_tokens": 128,
+        "temperature": 1.0
+      }
+    },
+    {
+      "model": "glm-5.2",
+      "endpoint": "https://api.z.ai/api/paas/v4",
+      "http_status": 429,
+      "code": "1113",
+      "error": "Insufficient balance or no resource package. Please recharge.",
+      "status": "blocked",
+      "response": null,
+      "usage": null,
+      "score": null,
+      "latency_ms": 388.8470829697326,
+      "prompt": "Reply with only OK.",
+      "settings": {
+        "thinking": {
+          "type": "enabled"
+        },
+        "reasoning_effort": "low",
+        "max_tokens": 128,
+        "temperature": 1.0
+      }
+    }
+  ]
+}

@@ -105,7 +105,7 @@ async def execute(store: Store, run_id: str, tasks: list[Task] | None = None,
 
             async def evaluate(model, task):
                 history = store.attempts(run_id, model.id, task.id)
-                failures = sum(a["status"] == "error" for a in history)
+                failures = sum(a["status"] == "error" and not a.get("fatal", False) for a in history)
                 while True:
                     await limiter.wait()
                     attempt_id, attempt = store.begin_attempt(run_id, model.id, task.id)
@@ -113,6 +113,7 @@ async def execute(store: Store, run_id: str, tasks: list[Task] | None = None,
                     generation = None
                     error = None
                     retryable = False
+                    fatal = False
                     try:
                         limiter.mark_started()
                         # timeout() runs generate in this worker; wait_for() would
@@ -122,12 +123,13 @@ async def execute(store: Store, run_id: str, tasks: list[Task] | None = None,
                     except (ProviderError, TimeoutError) as exc:
                         error = str(exc) or "Generation exceeded total timeout"
                         retryable = isinstance(exc, TimeoutError) or exc.retryable
+                        fatal = isinstance(exc, ProviderError) and exc.fatal
                     except asyncio.CancelledError:
                         attempt.update(status="interrupted", ended_at=now(), latency_ms=(time.perf_counter() - started) * 1000, error="Runner interrupted")
                         store.finish_attempt(attempt_id, attempt)
                         raise
                     latency = (time.perf_counter() - started) * 1000
-                    attempt.update(status="error" if error else "success", ended_at=now(), latency_ms=latency, error=error, retryable=retryable)
+                    attempt.update(status="error" if error else "success", ended_at=now(), latency_ms=latency, error=error, retryable=retryable, fatal=fatal)
                     if error:
                         failures += 1
                     terminal = not error or not retryable or failures > config.retries
@@ -141,7 +143,11 @@ async def execute(store: Store, run_id: str, tasks: list[Task] | None = None,
                                   "output_tokens": generation.output_tokens if generation else None,
                                   "provider_metadata": generation.metadata if generation else {},
                                   "completed_at": now()}
-                    store.finish_attempt(attempt_id, attempt, result)
+                    # Account/access failures are not task judgments. Preserve
+                    # the attempt, leave this task pending, and stop the run.
+                    store.finish_attempt(attempt_id, attempt, None if fatal else result)
+                    if fatal:
+                        raise ProviderError(error, fatal=True)
                     if terminal:
                         return
                     await asyncio.sleep(min(0.25 * 2 ** (failures - 1), 8))

@@ -239,5 +239,5 @@
     }
   ],
   "measured_glm_runs": [],
-  "evaluation_status": "No GLM API evaluations have been run. Provider endpoint, comparison model and usage budget await confirmation. Published scores below are external references, not local measurements."
+  "evaluation_status": "No scored GLM evaluations yet. Endpoint and model IDs are confirmed. Live access checks for glm-5.3 and glm-5.2 were rejected by Z.ai (HTTP 429, code 1113: insufficient balance or no resource package). Published scores remain external references."
 }

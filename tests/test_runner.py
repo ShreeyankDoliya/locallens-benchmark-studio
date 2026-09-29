@@ -32,6 +32,7 @@ class FakeProvider:
             await asyncio.sleep(.15 if cls.mode == 'slow' else .01)
             if cls.mode == 'retry' and cls.calls == 1: raise ProviderError('busy', True)
             if cls.mode == 'error': raise ProviderError('bad request')
+            if cls.mode == 'account': raise ProviderError('Account unavailable', fatal=True)
             return Generation('19', 10, 2)
         finally:
             cls.active -= 1
@@ -67,6 +68,23 @@ class RunnerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(self.store.run('test')['status'], 'completed')
         await execute(self.store, 'test', factory=FakeProvider)
         self.assertEqual(FakeProvider.calls, 4)
+
+    async def test_account_error_stops_without_scoring_and_can_resume(self):
+        FakeProvider.mode = 'account'
+        with self.assertRaisesRegex(ProviderError, 'Account unavailable'):
+            await self.run_it()
+        self.assertEqual(FakeProvider.calls, 1)
+        self.assertEqual(self.store.results('test'), [])
+        self.assertEqual(self.store.run('test')['status'], 'interrupted')
+        attempt = self.store.attempts('test', self.config.models[0].id, self.tasks[0].id)[0]
+        self.assertEqual(attempt['status'], 'error')
+        self.assertTrue(attempt['fatal'])
+        FakeProvider.mode = 'success'
+        await execute(self.store, 'test', factory=FakeProvider)
+        self.assertEqual(FakeProvider.calls, 5)
+        self.assertEqual(len(self.store.results('test')), 4)
+        self.assertTrue(all(r['error'] is None for r in self.store.results('test')))
+        self.assertEqual(self.store.run('test')['status'], 'completed')
 
     async def test_snapshot_resume_ignores_mutable_inputs(self):
         await self.run_it(max_new_results=1)

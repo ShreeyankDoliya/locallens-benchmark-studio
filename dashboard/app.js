@@ -56,8 +56,9 @@ function render() {
   state.series = datasets.flatMap((d, index) => d.summary.models.map(m => ({ ...m, data: d, label: `${m.model_id}${datasets.length > 1 ? ` · ${d.run.id}` : ''}`, runLabel: index ? 'Comparison' : 'Primary' }))).map((s, i) => ({ ...s, color: colors[i % colors.length] }));
   state.rows = state.series.flatMap(s => s.data.results.filter(r => r.model_id === s.model_id).map(r => ({ ...r, series: s, task: s.data.run.snapshot.tasks.find(t => t.id === r.task_id), disagreement: s.data.summary.disagreements.includes(r.task_id) })));
   const synthetic = Object.values(snap.model_manifests).some(m => m.synthetic);
+  const remote = Object.values(snap.model_manifests).some(m => m.remote);
   $('#notice').className = 'notice';
-  $('#notice').replaceChildren(el('strong', synthetic ? 'Scripted demo results. ' : 'Local model results. '), document.createTextNode(synthetic ? 'Mock responses and delays demonstrate the workflow. They do not measure LLM quality or inference speed.' : 'Results reflect this dataset, configuration, and machine. They do not establish overall model superiority.'));
+  $('#notice').replaceChildren(el('strong', synthetic ? 'Scripted demo results. ' : remote ? 'Remote API results. ' : 'Local model results. '), document.createTextNode(synthetic ? 'Mock responses and delays demonstrate the workflow. They do not measure LLM quality or inference speed.' : remote ? 'Timing includes network latency. Model aliases may change; provider hardware and immutable weight revisions are unavailable. These results do not establish overall superiority.' : 'Results reflect this dataset, configuration, and machine. They do not establish overall model superiority.'));
   if (run.status !== 'completed') $('#notice').append(document.createTextNode(' This run is incomplete; scores use completed tasks only.'));
   $('#run-meta').replaceChildren(document.createTextNode(`${snap.dataset_version} · ${run.status}`), el('br'), document.createTextNode(new Date(run.created_at).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' })));
   const entry = state.index.find(r => r.id === run.id);
@@ -74,7 +75,9 @@ function render() {
     note.textContent = differences.length ? `Comparison context differs: ${differences.join(', ')}. Inspect provenance before interpreting score or speed differences. Summary cards describe the primary run.` : 'Matching dataset, scoring version, configuration, and recorded hardware. Summary cards describe the primary run. Timings can still vary.';
   }
   const completed = data.results.length, failures = data.results.filter(r => !r.judgment.passed).length;
-  const metricData = [ ['Models evaluated', `${data.summary.models.length}`.padStart(2, '0'), 'Same task set · recorded settings', '◈'], ['Task results', `${completed}`, `${snap.tasks.length} tasks × ${snap.config.models.length} models · ${snap.tasks.length * snap.config.models.length - completed} pending`, '▦'], ['Results to inspect', `${failures}`.padStart(2, '0'), `${data.summary.disagreements.length} tasks with model disagreement`, '⌕'], ['Inference API fees', '$0', 'Local compute · energy cost not measured', '↗'] ];
+  const knownCost = data.summary.models.reduce((sum, model) => sum + (model.cost_usd ?? 0), 0);
+  const covered = data.summary.models.reduce((sum, model) => sum + model.cost_covered_results, 0);
+  const metricData = [ ['Models evaluated', `${data.summary.models.length}`.padStart(2, '0'), 'Same task set · recorded settings', '◈'], ['Task results', `${completed}`, `${snap.tasks.length} tasks × ${snap.config.models.length} models · ${snap.tasks.length * snap.config.models.length - completed} pending`, '▦'], ['Results to inspect', `${failures}`.padStart(2, '0'), `${data.summary.disagreements.length} tasks with model disagreement`, '⌕'], [remote ? 'Estimated API cost' : 'Inference API fees', remote ? (covered ? `$${knownCost.toFixed(4)}` : 'Unknown') : '$0', remote ? `${covered}/${completed} results covered · excludes unknown retry charges` : 'Local compute · energy cost not measured', '↗'] ];
   $('#metrics').replaceChildren(...metricData.map(([label, value, sub, symbol]) => { const card = el('div', null, 'metric'), head = el('div', label, 'metric-label'); head.append(el('span', symbol, 'metric-symbol')); card.append(head, el('div', value, 'metric-value'), el('div', sub, 'metric-sub')); return card; }));
   renderModelTable(); renderCategories(); renderLatency(); renderConsistency();
   const modelFilter = $('#model-filter'), categoryFilter = $('#category-filter');
@@ -92,7 +95,7 @@ function renderModelTable() {
     const row = el('tr'), name = el('td'), title = el('div', null, 'model-name');
     title.append(dot(s.color), document.createTextNode(s.model_id));
     const manifest = s.data.run.snapshot.model_manifests[s.model_id];
-    name.append(title, el('small', `${s.data.run.id} · ${manifest.synthetic ? 'SCRIPTED' : manifest.digest.slice(0, 12)}`));
+    name.append(title, el('small', `${s.data.run.id} · ${manifest.synthetic ? 'SCRIPTED' : manifest.remote ? 'API ALIAS' : manifest.digest.slice(0, 12)}`));
     const score = el('td', null, 'score-cell'), line = el('div', null, 'score-line'), bar = el('div', null, 'score-bar'), fill = el('div', null, 'score-fill');
     fill.style.width = `${(s.pass_rate || 0) * 100}%`; fill.style.background = s.color; bar.append(fill); line.append(el('span', pct(s.pass_rate), 'score-number'), bar); score.append(line);
     const cost = s.cost_usd == null ? 'Not estimated' : `$${s.cost_usd.toFixed(6)}`;

@@ -2,7 +2,7 @@
 
 Reviewed 29 September 2026. [Open the research dashboard](https://shreeyankdoliya.github.io/locallens-benchmark-studio/research.html).
 
-**No GLM API evaluation has been performed.** This update provides paper analysis, pinned upstream data, the full Terminal-Bench 2.0 task inventory, two real Docker harness controls, and clearly attributed external GLM scores. It does not present published numbers as our measurements. The existing mock and local Qwen benchmarks remain available on the main dashboard.
+**No scored GLM benchmark evaluation has been performed.** Two live access probes at the user-confirmed standard Z.ai endpoint were rejected with HTTP 429, provider code `1113` (insufficient balance or no resource package). Neither returned a model response or token usage. Their evidence is separate from benchmark scores in `dashboard/research/access.json`. This research track provides paper analysis, pinned upstream data, the full Terminal-Bench 2.0 task inventory, two real Docker harness controls, and clearly attributed external GLM scores. The existing mock and local Qwen benchmarks remain available on the main dashboard.
 
 ## What the Terminal-Bench paper establishes
 
@@ -68,7 +68,9 @@ The dashboard includes GLM-5.3 and GLM-5.2 reference values from the [Z.ai relea
 
 The next evaluation should use the same selected task IDs for both confirmed GLM model IDs, record the exact requested and returned versions, and predeclare prompt, reasoning settings and output budget. Start with a bounded pilot; label it as a subset, not a full benchmark score. Terminal tasks need a shared Terminus 2 scaffold and equal task budgets. Infrastructure errors, timeouts and model failures remain visible; repeated rollouts must not become “retry until passing.” Prefer paired per-task comparisons and disclose uncertainty instead of declaring a universal winner.
 
-**Remaining work:** provider/account endpoint and usage budget confirmation; choosing the second API model; a tested optional API adapter with budget accounting; native scorer integration for HumanEval/MBPP/GSM8K/IFEval; actual GLM trials and their individual evidence exports. No GLM key has been written to Git, the website, a config file or a report. Static GitHub Pages remains a viewer, not a credential-bearing inference service.
+**Confirmed:** standard endpoint `https://api.z.ai/api/paas/v4`, model IDs `glm-5.3` and `glm-5.2`, and permission to use them without a user-imposed spending ceiling. The optional Z.ai adapter now records usage and model aliases, with transport tests covering success and failure cases. Live probes were blocked by the provider account, not by a LocalLens budget limit. Code `1113` is terminal for a run even though its HTTP status is 429; blindly retrying it as a rate limit would waste requests. A stopped task is left unscored and resumable.
+
+**Remaining work:** resolving account access or confirming a Coding Plan route; validating a successful live API completion; native scorer integration for HumanEval/MBPP/GSM8K/IFEval; actual GLM trials and their individual evidence exports. API pricing estimates omit unknown/retry usage and cached discounts. No GLM key has been written to Git, the website, a config file or a report. Static GitHub Pages remains a viewer, not a credential-bearing inference service. See the [API instructions](../README.md#optional-glm-api-access) for the credential-free test coverage and access-check command.
 
 ## Commands and observed controls
 

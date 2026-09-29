@@ -119,3 +119,18 @@ test('real local results are distinct from the scripted demo', async ({ page }) 
   await expect(page.locator('#model-table tbody tr')).toHaveCount(4);
   await expect(page.locator('#notice')).toContainText('Local model results.');
 });
+
+test('remote API results never claim local inference or zero fees', async ({ page }) => {
+  await page.route('**/data/local-qwen-m1-pro.json', async route => {
+    const response = await route.fetch(); const data = await response.json();
+    Object.values(data.run.snapshot.model_manifests).forEach(m => { m.remote = true; });
+    data.summary.models.forEach(m => { m.cost_usd = null; m.cost_covered_results = 0; });
+    await route.fulfill({json:data});
+  });
+  await page.goto('/');
+  await expect(page.locator('#notice')).toContainText('Remote API results.');
+  await expect(page.locator('#notice')).toContainText('network latency');
+  await expect(page.locator('#metrics')).toContainText('Estimated API cost');
+  await expect(page.locator('#metrics')).toContainText('Unknown');
+  await expect(page.locator('#metrics')).not.toContainText('$0');
+});

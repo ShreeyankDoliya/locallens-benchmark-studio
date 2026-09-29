@@ -21,12 +21,20 @@ function detail(title, sections) {
 $('#close-research-dialog').addEventListener('click', () => $('#research-dialog').close());
 
 try {
-  const [catalog, inventory, controls] = await Promise.all([json('research/catalog.json'), json('research/terminal-tasks.json'), json('research/controls.json')]);
+  const [catalog, inventory, controls, access] = await Promise.all([json('research/catalog.json'), json('research/terminal-tasks.json'), json('research/controls.json'), json('research/access.json')]);
   if (catalog.schema_version !== 1 || inventory.tasks.length !== 89 || controls.kind !== 'harness_controls') throw new Error('Unsupported research evidence');
   $('#research-status').textContent = catalog.evaluation_status;
   $('#reviewed-on').textContent = `Sources reviewed ${catalog.reviewed_on}`;
-  const cards = [['Research benchmarks', catalog.benchmarks.length, 'Distinct papers and evaluation protocols'], ['Native terminal tasks', inventory.tasks.length, 'Pinned release · file hashes recorded'], ['Measured GLM runs', catalog.measured_glm_runs.length, 'Not run · provider and usage budget pending'], ['Local harness controls', controls.results.length, 'Reference solution + no-op baseline']];
+  const cards = [['Research benchmarks', catalog.benchmarks.length, 'Distinct papers and evaluation protocols'], ['Native terminal tasks', inventory.tasks.length, 'Pinned release · file hashes recorded'], ['Measured GLM runs', catalog.measured_glm_runs.length, 'No scores · provider access blocked'], ['Local harness controls', controls.results.length, 'Reference solution + no-op baseline']];
   $('#research-metrics').replaceChildren(...cards.map(([name, value, sub]) => { const c = el('div', null, 'metric'); c.append(el('div', name, 'metric-label'), el('div', value, 'metric-value'), el('div', sub, 'metric-sub')); return c; }));
+  if (access.kind !== 'provider_access_checks' || access.benchmark_results !== false) throw new Error('Access checks must not be benchmark scores');
+  for (const check of access.results) {
+    const row = el('tr');
+    row.append(el('td', check.model, 'task-id'), el('td', check.status, 'mono'), el('td', `HTTP ${check.http_status} · code ${check.code}`, 'mono'), el('td', 'Not scored', 'subtle'));
+    $('#access-table tbody').append(row);
+  }
+  const accessDownload = el('a', 'Download access evidence ↗'); accessDownload.href = 'research/access.json'; accessDownload.download = 'access.json';
+  $('#access-note').append(document.createTextNode(access.note + ' '), accessDownload);
   const vendors = catalog.published_scores.filter(s => s.origin === 'vendor_reported');
   for (const benchmark of [...new Set(vendors.map(s => s.benchmark))]) {
     const scores = vendors.filter(s => s.benchmark === benchmark), first = scores[0], row = el('tr'), action = el('td'), button = el('button', 'Inspect source ↗', 'inspect-button');

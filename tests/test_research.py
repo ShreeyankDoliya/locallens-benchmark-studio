@@ -70,6 +70,17 @@ class ResearchTests(unittest.TestCase):
             self.assertEqual(result["reward"], 1 if result["agent"] == "oracle" else 0)
             self.assertRegex(result["raw_result_sha256"], r"^[a-f0-9]{64}$")
 
+    def test_rejected_access_checks_have_no_quality_scores(self):
+        payload = json.loads((ROOT / "dashboard/research/access.json").read_text())
+        self.assertFalse(payload["benchmark_results"])
+        self.assertEqual(len(payload["results"]), 2)
+        for row in payload["results"]:
+            self.assertEqual(row["http_status"], 429)
+            self.assertEqual(row["code"], '1113')
+            self.assertIsNone(row['score'])
+            self.assertIsNone(row['response'])
+            self.assertIsNone(row['usage'])
+
     def test_control_export_rejects_model_runs(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp); trial = root / "job" / "trial"; trial.mkdir(parents=True)

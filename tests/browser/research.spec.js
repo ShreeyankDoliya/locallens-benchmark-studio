@@ -3,7 +3,10 @@ import { test, expect } from '@playwright/test';
 test('research references cannot be confused with measured GLM runs', async ({ page }) => {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await page.goto('/research.html');
-  await expect(page.locator('#research-status')).toContainText('No GLM API evaluations have been run');
+  await expect(page.locator('#research-status')).toContainText('No scored GLM evaluations yet');
+  await expect(page.locator('#access-table tbody tr')).toHaveCount(2);
+  await expect(page.locator('#access-table')).toContainText('1113');
+  await expect(page.locator('#access-table')).toContainText('Not scored');
   await expect(page.locator('#reference-table tbody tr')).toHaveCount(6);
   await expect(page.locator('#paper-grid article')).toHaveCount(5);
   await page.getByRole('button', {name: 'Inspect source for Terminal-Bench 2.1', exact: true}).click();

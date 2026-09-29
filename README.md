@@ -22,9 +22,9 @@ The GitHub Pages site **only displays published results**. Evaluations run local
 - Model/category pass rates, p50/p90/p95 latency, error rate, perturbation consistency, disagreement filters, and optional token-based cost estimates.
 - Static run comparison, searchable failure inspection, JSON downloads, Markdown reports, and GitHub Pages deployment.
 - Research catalog covering Terminal-Bench 2.0, HumanEval, MBPP, GSM8K and IFEval, with pinned data sources and explicit protocol limits.
-- Source-linked external GLM reference scores, the complete 89-task Terminal-Bench inventory, and real oracle/no-op Docker controls. **GLM API evaluations have not run**; these external scores are labeled separately from our measurements.
+- Source-linked external GLM reference scores, the complete 89-task Terminal-Bench inventory, and real oracle/no-op Docker controls. **Scored GLM benchmark evaluations have not run**; these external scores are labeled separately from our measurements.
 
-The research track keeps the original zero-cost workflow intact. Paid API inference is optional and is not implemented or required by the core runner. For research data validation and credential-free preparation:
+The research track keeps the original zero-cost workflow intact. The optional Z.ai adapter supports remote GLM requests, but the live access checks were rejected with provider code `1113` (insufficient balance or no resource package). No GLM quality scores have been measured. For research data validation and credential-free preparation:
 
 ```bash
 .venv/bin/python -m benchmark_studio.research verify
@@ -32,6 +32,30 @@ The research track keeps the original zero-cost workflow intact. Paid API infere
 ```
 
 Preparation downloads the four prompt datasets at pinned revisions, verifies hashes and splits, and saves a repeatable task selection under `runs/research/sources`. It does not perform inference or replace the official scorers. The [research analysis](docs/RESEARCH.md) contains exact Docker control commands, observed results, the remaining GLM integration work, and hardware limitations.
+
+## Optional GLM API access
+
+The explicitly configured endpoint is `https://api.z.ai/api/paas/v4`, with model IDs `glm-5.3` and `glm-5.2`. Both use enabled reasoning and a recorded effort setting. Model IDs are mutable API aliases, not pinned weight digests. Provider hardware is unavailable; response time includes networking.
+
+Check access using a hidden prompt (the key is not saved):
+
+```bash
+.venv/bin/python -m benchmark_studio.api_check --prompt-key --output runs/glm/access.json
+```
+
+This sends one short request per model, has no automatic retries, records usage when returned, and exits with status 2 if either check fails. It is not a benchmark. The two live checks on 2026-09-29 returned HTTP 429 / code 1113; they are shown separately in the research dashboard. A Coding Plan subscription can require a different documented endpoint from the standard API. Confirm your account's route before setting `ZAI_BASE_URL`; the adapter only permits the two official Z.ai routes and never follows redirects.
+
+After access works, set `ZAI_API_KEY` in your shell environment and run the original **20-task LocalLens diagnostic**, using the existing checkpoint/export workflow:
+
+```bash
+export ZAI_BASE_URL=https://api.z.ai/api/paas/v4
+# ZAI_API_KEY must already be set in this shell; keep its value out of commands and Git.
+.venv/bin/llm-bench run --config configs/zai.json --run-id glm-diagnostic --max-tasks 2
+.venv/bin/llm-bench run --run-id glm-diagnostic --resume
+.venv/bin/llm-bench export --run-id glm-diagnostic --output dashboard/data
+```
+
+This command does **not** evaluate Terminal-Bench, HumanEval, MBPP, GSM8K or IFEval. Their native scorer/agent integrations are separate research work. The Z.ai adapter is covered by simulated transport tests, including successful responses, request settings, token usage, credential redaction and error classification; a successful live completion has not yet been validated. Account failures stop the run without scoring the affected task, while preserving its failed attempt for resume. Temporary rate limits use the configured bounded retries. Cost estimates use recorded token counts and configured prices, do not apply cached-input discounts, and exclude unreported usage or retry charges; they are not a billing statement or spending limit.
 
 ## Quick start: no models or API keys
 
@@ -199,6 +223,6 @@ This is a small diagnostic benchmark, not a general leaderboard. Six perturbatio
 
 Unknown usage and costs stay null. Configurable `input_per_million` and `output_per_million` rates estimate observed token usage only; they do not price local energy or missing retry usage. Provider errors count as failures. Incomplete runs show completed and planned counts, and their provisional rates should not be treated as full-run results.
 
-Optional LLM judging, semantic rubrics, generated-code execution, paid API adapters, repeated-trial confidence intervals, controlled warm-up schedules, and large-dataset pagination are future extensions. Judge-based scores must have a separate score kind and must never be merged silently into deterministic scores. The MVP does not require any of those extensions.
+Optional LLM judging, semantic rubrics, native research-benchmark scorers, additional API providers, repeated-trial confidence intervals, controlled warm-up schedules, and large-dataset pagination are future extensions. The optional Z.ai adapter exists; successful live inference remains unverified because the account-access probes were rejected. Judge-based scores must have a separate score kind and must never be merged silently into deterministic scores. The zero-cost MVP does not require any of those extensions.
 
 MIT licensed. Created by **Shreeyank Doliya**.
