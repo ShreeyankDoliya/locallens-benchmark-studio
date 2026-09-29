@@ -1,0 +1,32 @@
+{
+  "name": "Local Qwen \u00b7 M1 Pro",
+  "models": [
+    {
+      "id": "qwen-0.5b",
+      "provider": "ollama",
+      "model": "qwen2.5:0.5b",
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 2048
+      }
+    },
+    {
+      "id": "qwen-1.5b",
+      "provider": "ollama",
+      "model": "qwen2.5:1.5b",
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 2048
+      }
+    }
+  ],
+  "concurrency": 1,
+  "requests_per_second": 1.0,
+  "timeout_seconds": 180.0,
+  "retries": 2,
+  "hardware_notes": "Apple M1 Pro (8 CPU cores), Apple M1 Pro integrated GPU via Metal, 16 GiB unified RAM; macOS 26.6.2 arm64. AC power, Low Power Mode off. Normal desktop workload, not isolated; no warm-up exclusion. Ollama 0.34.4; OLLAMA_NO_CLOUD=1, OLLAMA_NUM_PARALLEL=1, OLLAMA_MAX_LOADED_MODELS=1; one request at a time. Model loads are included in request latency."
+}

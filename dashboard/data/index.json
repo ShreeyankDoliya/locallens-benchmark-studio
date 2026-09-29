@@ -2,6 +2,14 @@
   "schema_version": 1,
   "runs": [
     {
+      "id": "local-qwen-m1-pro",
+      "name": "Local Qwen \u00b7 M1 Pro",
+      "status": "completed",
+      "created_at": "2026-09-29T08:37:03.417023+00:00",
+      "file": "local-qwen-m1-pro.json",
+      "report": "local-qwen-m1-pro.md"
+    },
+    {
       "id": "mock-demo",
       "name": "Mock demonstration",
       "status": "completed",

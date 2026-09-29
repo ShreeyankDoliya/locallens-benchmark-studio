@@ -1,12 +1,24 @@
 import { test, expect } from '@playwright/test';
 
+async function choose(page, id, value) {
+  await page.locator(`${id}-trigger`).click();
+  await page.locator(`${id}-listbox [role=option]`).filter({ hasText: await page.locator(id).evaluate((select, target) => [...select.options].find(option => option.value === target).textContent, value) }).click();
+}
+
+async function openMock(page) {
+  await page.goto('/');
+  await choose(page, '#run-select', 'mock-demo');
+  await expect(page.locator('#notice')).toContainText('Scripted demo results.');
+  await expect(page.locator('#model-table')).toContainText('mock-steady');
+}
+
 test('published demo renders and every failure opens evidence', async ({ page }) => {
   const errors = [];
   page.on('pageerror', e => errors.push(e.message));
-  await page.goto('/');
+  await openMock(page);
   await expect(page.locator('#model-table tbody tr')).toHaveCount(2);
   await expect(page.locator('#task-table tbody tr')).toHaveCount(40);
-  await page.selectOption('#outcome-filter', 'failed');
+  await choose(page, '#outcome-filter', 'failed');
   await expect(page.locator('#task-table tbody tr')).toHaveCount(12);
   await page.getByRole('button', { name: 'Inspect code-bool for mock-hasty in mock-demo', exact: true }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -15,7 +27,7 @@ test('published demo renders and every failure opens evidence', async ({ page })
   await expect(page.locator('#detail-content')).toContainText('Attempt history');
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  await page.selectOption('#outcome-filter', 'error');
+  await choose(page, '#outcome-filter', 'error');
   await expect(page.locator('#task-table tbody tr')).toHaveCount(1);
   await page.getByRole('button', { name: /Inspect json-empty/ }).click();
   await expect(page.locator('#detail-content')).toContainText('3 attempt(s)');
@@ -23,9 +35,9 @@ test('published demo renders and every failure opens evidence', async ({ page })
 });
 
 test('compare runs, reset filters, and download report', async ({ page }) => {
-  await page.goto('/');
+  await openMock(page);
   await expect(page.locator('#task-table tbody tr')).toHaveCount(40);
-  await page.selectOption('#compare-select', 'mock-repeat');
+  await choose(page, '#compare-select', 'mock-repeat');
   await expect(page.locator('#model-table tbody tr')).toHaveCount(4);
   await expect(page.locator('#task-table tbody tr')).toHaveCount(80);
   await expect(page.locator('#comparison-note')).toBeVisible();
@@ -33,7 +45,7 @@ test('compare runs, reset filters, and download report', async ({ page }) => {
   await expect(page.locator('#empty')).toBeVisible();
   await page.getByRole('button', { name: 'Reset filters' }).click();
   await expect(page.locator('#task-table tbody tr')).toHaveCount(80);
-  await page.selectOption('#outcome-filter', 'disagreement');
+  await choose(page, '#outcome-filter', 'disagreement');
   await expect(page.locator('#task-table tbody tr')).toHaveCount(40);
   const downloadEvent = page.waitForEvent('download');
   await page.locator('#download-report').click();
@@ -42,11 +54,11 @@ test('compare runs, reset filters, and download report', async ({ page }) => {
 
 test('mobile layout stays within viewport and filters work', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await openMock(page);
   await expect(page.locator('#task-table tbody tr')).toHaveCount(40);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.selectOption('#category-filter', 'grounding');
-  await page.selectOption('#model-filter', 'mock-hasty');
+  await choose(page, '#category-filter', 'grounding');
+  await choose(page, '#model-filter', 'mock-hasty');
   await expect(page.locator('#task-table tbody tr')).toHaveCount(4);
   await page.locator('.inspect-button').first().click();
   await expect(page.getByRole('dialog')).toBeVisible();
@@ -60,7 +72,7 @@ test('untrusted model output is displayed as text', async ({ page }) => {
     data.results[0].response = '<img src=x onerror="window.injected=true">';
     await route.fulfill({ json: data });
   });
-  await page.goto('/');
+  await openMock(page);
   await expect(page.locator('#task-table tbody tr')).toHaveCount(40);
   await page.fill('#search', 'window.injected');
   await page.locator('.inspect-button').click();
@@ -73,4 +85,37 @@ test('missing exports show an actionable error', async ({ page }) => {
   await page.route('**/data/index.json', route => route.fulfill({status:404,body:'Missing'}));
   await page.goto('/');
   await expect(page.locator('#notice')).toContainText('HTTP 404');
+});
+
+test('themed dropdowns support keyboard selection, Escape, and outside dismissal', async ({ page }) => {
+  await page.goto('/');
+  const trigger = page.locator('#run-select-trigger');
+  await expect(trigger).toBeEnabled();
+  await trigger.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'true');
+  await page.keyboard.press('End');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#run-select')).toHaveValue('local-qwen-m1-pro');
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await page.keyboard.press('Enter');
+  await page.keyboard.press('End');
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#run-select')).toHaveValue('mock-repeat');
+  await expect(page.locator('#notice')).toContainText('Scripted demo results.');
+  await trigger.click();
+  await page.getByRole('heading', { name: 'Every score has a story.' }).click();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('real local results are distinct from the scripted demo', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#notice')).toContainText('Local model results.');
+  await expect(page.locator('#model-table')).toContainText('qwen-0.5b');
+  await expect(page.locator('#model-table')).toContainText('qwen-1.5b');
+  await expect(page.locator('#task-table tbody tr')).toHaveCount(40);
+  await choose(page, '#compare-select', 'mock-demo');
+  await expect(page.locator('#comparison-note')).toContainText('configurations');
+  await expect(page.locator('#model-table tbody tr')).toHaveCount(4);
+  await expect(page.locator('#notice')).toContainText('Local model results.');
 });

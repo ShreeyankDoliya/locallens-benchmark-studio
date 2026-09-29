@@ -44,6 +44,8 @@ On Windows PowerShell, use `py -m venv .venv` and `.venv\Scripts\Activate.ps1`. 
 
 If you already use [uv](https://docs.astral.sh/uv/), `uv sync --locked` replaces the environment/install steps. `uv.lock` and `requirements.txt` pin transitive runtime dependencies. Packaging builds use the pinned Hatchling version in `pyproject.toml`.
 
+The hosted dashboard also includes a real **Qwen2.5 0.5B / 1.5B** run on an Apple M1 Pro: **2/20** and **6/20** tasks passed the strict checks. All 40 requests completed without provider errors, with token usage recorded. See [the real-run verification](docs/VERIFICATION.md#real-local-model-verification) for commands, hardware and interpretation. These sample scores do not establish general model superiority.
+
 The demo intentionally includes wrong answers, a recovered transient error, and an exhausted retry sequence. Its scores are **19/20 (95%)** for `mock-steady` and **9/20 (45%)** for `mock-hasty`. Those are scripted fixtures, not measurements of an LLM. Their token counts and costs are unknown, not invented.
 
 ## Run two local models
@@ -141,7 +143,7 @@ npm run test:ui
 
 If Google Chrome is already installed, `PLAYWRIGHT_CHANNEL=chrome npm run test:ui` can use it instead of downloading Chromium.
 
-The browser suite uses the two checked-in mock reports to check comparison, filters, prompt inspection, retries, report downloads, mobile layout, missing data, and safe rendering of untrusted output. On Linux, use `npx playwright install --with-deps chromium` if browser system libraries are missing. CI runs Python tests, report verification, browser tests, and then deploys Pages on successful main-branch pushes.
+The browser suite uses the checked-in mock and real local-model reports to check comparison, filters, prompt inspection, retries, report downloads, mobile layout, missing data, themed dropdown keyboard interaction, and safe rendering of untrusted output. On Linux, use `npx playwright install --with-deps chromium` if browser system libraries are missing. CI runs Python tests, report verification, browser tests, and then deploys Pages on successful main-branch pushes.
 
 ## Deploy to GitHub Pages
 

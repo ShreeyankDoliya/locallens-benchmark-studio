@@ -1,3 +1,5 @@
+import { enhanceSelects, refreshSelects } from './select.js';
+
 const $ = (selector) => document.querySelector(selector);
 const colors = ['#4e7961', '#be9768', '#528b9e', '#9a769d', '#788e47', '#b77275'];
 const labels = { instruction_following: 'Instruction following', structured_output: 'Structured output', reasoning: 'Reasoning', grounding: 'Context grounding', code: 'Code tracing' };
@@ -83,6 +85,7 @@ function render() {
   if ([...categoryFilter.options].some(o => o.value === previousCategory)) categoryFilter.value = previousCategory;
   $('#provenance').textContent = JSON.stringify(datasets.map(d => ({ run: d.run.id, status: d.run.status, created_at: d.run.created_at, updated_at: d.run.updated_at, ...d.run.snapshot, tasks: `${d.run.snapshot.tasks.length} tasks; included in raw JSON` })), null, 2);
   renderRows();
+  refreshSelects();
 }
 function renderModelTable() {
   $('#model-table tbody').replaceChildren(...state.series.map(s => {
@@ -165,10 +168,11 @@ function showDetail(r) {
 $('#run-select').addEventListener('change', selectRuns);
 $('#compare-select').addEventListener('change', selectRuns);
 for (const id of ['search', 'model-filter', 'category-filter', 'outcome-filter']) $(`#${id}`).addEventListener(id === 'search' ? 'input' : 'change', renderRows);
-$('#clear-filters').addEventListener('click', () => { for (const id of ['search', 'model-filter', 'category-filter', 'outcome-filter']) $(`#${id}`).value = ''; renderRows(); });
+$('#clear-filters').addEventListener('click', () => { for (const id of ['search', 'model-filter', 'category-filter', 'outcome-filter']) $(`#${id}`).value = ''; renderRows(); refreshSelects(); });
 $('#close-dialog').addEventListener('click', () => $('#detail-dialog').close());
 $('#detail-dialog').addEventListener('click', event => { if (event.target === $('#detail-dialog')) { const rect = event.target.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) event.target.close(); } });
 for (const link of document.querySelectorAll('.nav-link')) link.addEventListener('click', () => { document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); link.classList.add('active'); });
+enhanceSelects();
 try {
   const index = await json('data/index.json');
   if (index.schema_version !== 1 || !Array.isArray(index.runs) || !index.runs.length) throw new Error('No published runs. Run llm-bench export first');

@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sign in or create a LocalLens account.">
+  <meta name="theme-color" content="#141e24">
+  <title>Sign in · LocalLens</title>
+  <link rel="icon" href="../../dashboard/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../dashboard/styles.css"><link rel="stylesheet" href="login.css">
+  <script type="module" src="login.js"></script>
+</head>
+<body class="auth-page">
+  <main class="auth-layout">
+    <section class="auth-story" aria-label="About LocalLens">
+      <a class="brand" href="../../dashboard/"><span class="logo" aria-hidden="true">◈</span><span>LocalLens<small>LLM BENCHMARK STUDIO</small></span></a>
+      <div class="auth-story-content"><div class="auth-kicker"><span class="status-dot"></span> CURIOSITY, BACKED BY EVIDENCE</div><h1>Better questions.<br>Clearer comparisons<span>.</span></h1><p>Understand what your models get right.<br>Learn from everything they don’t.</p>
+        <div class="auth-illustration" aria-hidden="true"><div class="mini-heading"><span>BENCHMARK WORKSPACE</span><span>◈</span></div><div class="mini-row"><span>Quality</span><div><i style="width:78%"></i></div><b>01</b></div><div class="mini-row"><span>Reliability</span><div><i style="width:60%"></i></div><b>02</b></div><div class="mini-row"><span>Speed</span><div><i style="width:88%"></i></div><b>03</b></div><div class="mini-foot"><span>Every score, inspectable.</span><span>↗</span></div></div>
+        <div class="auth-benefits"><span>✓ Local inference</span><span>✓ Transparent scoring</span><span>✓ Reproducible reports</span></div>
+      </div>
+      <div class="auth-story-footer">Built for people who look beyond the leaderboard.</div>
+    </section>
+    <section class="auth-form-side" aria-labelledby="auth-title">
+      <a href="../../dashboard/" class="back-link">← Back to dashboard</a>
+      <div class="auth-card"><div class="eyebrow">YOUR RESEARCH WORKSPACE</div><h2 id="auth-title">Welcome back.</h2><p id="auth-subtitle" class="auth-subtitle">Sign in to your LocalLens account.</p>
+        <div class="auth-tabs" aria-label="Account action"><a id="login-tab" class="selected" href="login.html">Sign in</a><a id="signup-tab" href="login.html?mode=signup">Create account</a></div>
+        <p id="auth-status" class="auth-status" role="status">Design preview. Account storage is pending selection; sign-in is disabled.</p>
+        <form id="auth-form" method="post">
+          <div class="auth-field" id="name-field" hidden><label for="display-name">Full name</label><input id="display-name" name="name" autocomplete="name" minlength="2" maxlength="80" placeholder="Your name"></div>
+          <div class="auth-field"><label for="email">Email address</label><input id="email" name="email" type="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required></div>
+          <div class="auth-field"><label for="password">Password</label><div class="password-wrap"><input id="password" name="password" type="password" autocomplete="current-password" maxlength="128" placeholder="Enter your password" required><button id="toggle-password" type="button" aria-label="Show password" aria-pressed="false">Show</button></div><p id="password-hint" class="field-hint" hidden>Use at least 15 characters. A memorable passphrase works well.</p></div>
+          <button id="auth-submit" type="submit" class="auth-submit" disabled><span id="submit-label">Sign in</span><span aria-hidden="true">↗</span></button>
+        </form>
+        <p class="auth-switch"><span id="switch-copy">New to LocalLens?</span> <a id="switch-link" href="login.html?mode=signup">Create an account</a></p>
+        <div class="auth-divider"><span>JUST EXPLORING?</span></div><a class="guest-link" href="../../dashboard/">Browse published benchmarks <span aria-hidden="true">→</span></a>
+        <p class="auth-footnote">Published benchmark reports remain publicly accessible.</p>
+      </div>
+      <div class="auth-bottom"><span>LocalLens · LLM Benchmark Studio</span><a href="https://github.com/ShreeyankDoliya/locallens-benchmark-studio">View source ↗</a></div>
+    </section>
+  </main>
+</body>
+</html>

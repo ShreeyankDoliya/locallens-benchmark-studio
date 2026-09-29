@@ -40,8 +40,8 @@ Run IDs are unique in SQLite. Repeating the sample-generation commands against a
 ## Results
 
 - Dataset validation: **20 tasks**, **5 categories**, **6 perturbation groups**.
-- Python suite: **28 tests passed**.
-- Browser suite: **5 tests passed**, including mobile overflow, filters, comparison, evidence, downloads and output escaping.
+- Python suite: **30 tests passed**, including every published report and index entry.
+- Browser suite: **7 tests passed**, including mobile overflow, filters, comparison, evidence, downloads, output escaping and themed dropdown keyboard controls.
 - `mock-demo`: **40 completed model/task results**.
 - `mock-repeat`: stopped at **7 results**, resumed to **40**, preserving saved results.
 - Report reconstructed from published JSON: **byte-identical**, `cmp` exited 0.
@@ -58,6 +58,40 @@ These timings reflect **scripted sleeps plus runtime overhead**, not model infer
 
 ## Remaining limits
 
-Ollama is not installed on the verification host, so no open-weight model was downloaded or evaluated in this session. The local adapter was tested against Ollama-shaped HTTP responses, including metadata, request payloads, error codes, missing token usage, malformed responses and rejection of remote/cloud configurations. A real local benchmark requires installing Ollama and the model tags listed in the README.
+Ollama 0.34.4 was subsequently installed on this host and both configured open-weight models were evaluated successfully. The adapter also has tests for metadata, request payloads, error codes, missing token usage, malformed responses and rejection of remote/cloud configurations.
 
 LLM judges and paid providers are future extensions. GPU details and power conditions are manual notes. There are no statistical confidence intervals, controlled warm-up runs, generated-code sandbox, or large-table pagination. The site publishes evidence only and cannot initiate local evaluations.
+
+
+## Real local-model verification
+
+The follow-up run `local-qwen-m1-pro` used Qwen2.5 0.5B and 1.5B (Q4_K_M) through Ollama 0.34.4 on an Apple M1 Pro with 16 GiB unified memory and Metal acceleration. AC power was connected and Low Power Mode was off. Normal desktop applications remained active; these are not isolated performance measurements. No scoring rules or prompts were changed after inspecting responses.
+
+```bash
+HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 brew install ollama
+OLLAMA_NO_CLOUD=1 OLLAMA_NUM_PARALLEL=1 OLLAMA_MAX_LOADED_MODELS=1 OLLAMA_HOST=http://127.0.0.1:11434 ollama serve > runs/ollama-server.log 2>&1
+```
+
+In another terminal:
+
+```bash
+ollama pull qwen2.5:0.5b
+ollama pull qwen2.5:1.5b
+ollama list
+.venv/bin/llm-bench run --config configs/ollama-m1-pro.json --dataset datasets/studio-sample-v1.jsonl --run-id local-qwen-m1-pro --max-tasks 7
+.venv/bin/llm-bench run --run-id local-qwen-m1-pro --resume
+.venv/bin/llm-bench export --run-id local-qwen-m1-pro --output dashboard/data
+.venv/bin/llm-bench report dashboard/data/local-qwen-m1-pro.json --output runs/local-qwen-reproduced.md
+cmp dashboard/data/local-qwen-m1-pro.md runs/local-qwen-reproduced.md
+```
+
+The real run stopped after seven task results and resumed to 40 without replacing saved results. All 40 requests returned responses and token counts; there were no retries or provider errors. The reconstructed report was byte-identical.
+
+| Local model | Passed | Pass rate | Errors | p50 | p95 |
+|---|---:|---:|---:|---:|---:|
+| Qwen2.5 0.5B | 2 / 20 | 10% | 0 | 166.03 ms | 1,609.41 ms |
+| Qwen2.5 1.5B | 6 / 20 | 30% | 0 | 149.63 ms | 2,274.69 ms |
+
+There were four task-level disagreements. The strict format checks rejected extra explanations and Markdown-fenced JSON even when the answer content was otherwise correct. Other responses contained incorrect reasoning or code-trace answers. The 256-token output limit also truncated some long explanations. These are narrow, configuration-specific observations on 20 tasks, not evidence of overall superiority or stable speed rankings. No warm-up requests were excluded.
+
+Full model digests, quantization, native templates, generation settings, raw responses, token counts, timings and hardware notes are preserved in `dashboard/data/local-qwen-m1-pro.json`. The example machine configuration is `configs/ollama-m1-pro.json`; edit its hardware notes before using it on another computer. Homebrew installed Ollama with its MLX dependencies and upgraded its Python/readline dependencies; the benchmark continued to use the existing Python 3.12 virtual environment. Ollama was launched for this session, not registered to start at login.
