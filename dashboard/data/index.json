@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "runs": [
+    {
+      "id": "mock-demo",
+      "name": "Mock demonstration",
+      "status": "completed",
+      "created_at": "2026-09-29T08:12:14.202504+00:00",
+      "file": "mock-demo.json",
+      "report": "mock-demo.md"
+    },
+    {
+      "id": "mock-repeat",
+      "name": "Mock demonstration",
+      "status": "completed",
+      "created_at": "2026-09-29T08:12:16.706518+00:00",
+      "file": "mock-repeat.json",
+      "report": "mock-repeat.md"
+    }
+  ]
+}

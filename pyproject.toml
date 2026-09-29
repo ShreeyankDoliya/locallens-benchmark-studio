@@ -1,0 +1,19 @@
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llm-benchmark-studio"
+version = "0.1.0"
+description = "Reproducible local LLM evaluation with a static dashboard"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{name = "Shreeyank Doliya"}]
+dependencies = ["httpx==0.28.1", "pydantic==2.12.5"]
+
+[project.scripts]
+llm-bench = "benchmark_studio.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/benchmark_studio"]

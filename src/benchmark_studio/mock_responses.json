@@ -1,0 +1,206 @@
+{
+  "5eb6b7bb3ba4e2559e2a2683466bc86da249fb5a9dd0b328dcfe45972cf546d9": {
+    "steady": {
+      "text": "alder,birch,cedar",
+      "delay": 0.031
+    },
+    "hasty": {
+      "text": "alder,birch,cedar",
+      "delay": 0.011
+    }
+  },
+  "4c55cbcd6887c92dcbf27e17e3b0483e88c2a2b6f93f6b24fc7b25adf4a2a1fa": {
+    "steady": {
+      "text": "alder,birch,cedar",
+      "delay": 0.037000000000000005
+    },
+    "hasty": {
+      "text": "alder, birch, cedar",
+      "delay": 0.014
+    }
+  },
+  "fe66c07866836e8b62c2ddeb71367f7b2512da89b37f23a1397751ae29f191eb": {
+    "steady": {
+      "text": "amber|ink",
+      "delay": 0.043000000000000003
+    },
+    "hasty": {
+      "text": "amber, ink",
+      "delay": 0.017
+    }
+  },
+  "56b97a2769730f0b920ee712cd0e955441ad842ed5de2b3c2352ca5e64d79790": {
+    "steady": {
+      "text": "amber|ink",
+      "delay": 0.049
+    },
+    "hasty": {
+      "text": "amber|ink",
+      "delay": 0.008
+    }
+  },
+  "75d12658455edd5695bd093e40fbbfe23a78b2456c18b21f2946fe973260cb65": {
+    "steady": {
+      "text": "{\"item\":\"pencil\",\"count\":3,\"available\":true}",
+      "delay": 0.025
+    },
+    "hasty": {
+      "text": "{\"item\":\"pencil\",\"count\":3,\"available\":true}",
+      "delay": 0.011
+    }
+  },
+  "b8d86a3956de8c47a82fd00a9747fe646a8859fec9b66115b488d8983977a8a1": {
+    "steady": {
+      "text": "{\"item\":\"pencil\",\"count\":3,\"available\":true}",
+      "delay": 0.031
+    },
+    "hasty": {
+      "text": "{\"item\":\"pencil\",\"count\":\"3\",\"available\":true}",
+      "delay": 0.014
+    }
+  },
+  "fce6d192029a070d2ca2e36172fff1cd6bf7227d28ad83dc8f346bdb719dc54f": {
+    "steady": {
+      "text": "[4,9,16]",
+      "delay": 0.037000000000000005
+    },
+    "hasty": {
+      "text": "```json\n[4,9,16]\n```",
+      "delay": 0.017
+    }
+  },
+  "6370a48c10eecfd244944f6627c11ac512f81b81e7a181f05b3291a19bfb9153": {
+    "steady": {
+      "text": "{\"attendees\":[]}",
+      "delay": 0.043000000000000003
+    },
+    "hasty": {
+      "text": "{\"attendees\":[]}",
+      "delay": 0.008,
+      "error": "Simulated local server unavailable",
+      "failures": 100
+    }
+  },
+  "d19e3bfd093aca1e86e95fa8bf9de3dc0720f0f7d9a29923d6e6a25c8b92dd92": {
+    "steady": {
+      "text": "19",
+      "delay": 0.049
+    },
+    "hasty": {
+      "text": "19",
+      "delay": 0.011
+    }
+  },
+  "6c1b37e2636ab5cc564d0487a595dd1b97c68d25c947d3ff91bf4fd6ca8a768a": {
+    "steady": {
+      "text": "19",
+      "delay": 0.025
+    },
+    "hasty": {
+      "text": "17",
+      "delay": 0.014
+    }
+  },
+  "69df4ebe10a5325ac4f1bf3e0ee2af3d63a3f56e58afd04f8cb4230921208a17": {
+    "steady": {
+      "text": "Taro",
+      "delay": 0.031
+    },
+    "hasty": {
+      "text": "Taro",
+      "delay": 0.017
+    }
+  },
+  "cb12cedf1068ac5b7a33a78fcdf3da0cb88c868d836f2caaf8af082f35b6ba11": {
+    "steady": {
+      "text": "15",
+      "delay": 0.037000000000000005
+    },
+    "hasty": {
+      "text": "15",
+      "delay": 0.008
+    }
+  },
+  "2808c90ff328c9fb026b59b21bf404f9cdf018deafd032b8712e1991d4766878": {
+    "steady": {
+      "text": "10:30",
+      "delay": 0.043000000000000003
+    },
+    "hasty": {
+      "text": "10:30",
+      "delay": 0.011
+    }
+  },
+  "0a37df19fef6988be051b63155ead22d51366da532d85842135fdddf1b57bda3": {
+    "steady": {
+      "text": "10:30",
+      "delay": 0.049
+    },
+    "hasty": {
+      "text": "07:00",
+      "delay": 0.014
+    }
+  },
+  "e2a1636ac299a2ffdad0870e02bf8b565b236dc74b55311ad2b1108fe3b8a99e": {
+    "steady": {
+      "text": "UNKNOWN",
+      "delay": 0.025
+    },
+    "hasty": {
+      "text": "2020",
+      "delay": 0.017
+    }
+  },
+  "04c454bab86f4f8d66b330bbb8db7a5bf568dbc033a654bfd71fdddd722fb678": {
+    "steady": {
+      "text": "Delta",
+      "delay": 0.031
+    },
+    "hasty": {
+      "text": " DELTA ",
+      "delay": 0.008,
+      "error": "Simulated temporary busy response",
+      "failures": 1
+    }
+  },
+  "e806d0f57dc0990d18df5b6a63ffae39657fa53f36206469aa146d90c9fe039a": {
+    "steady": {
+      "text": "10",
+      "delay": 0.037000000000000005
+    },
+    "hasty": {
+      "text": "10",
+      "delay": 0.011
+    }
+  },
+  "7e9d487fe4447abc7d3213ab4b0b1d6bc9d69ba7a9c8b15afa380a34c7af9fdf": {
+    "steady": {
+      "text": "10",
+      "delay": 0.043000000000000003
+    },
+    "hasty": {
+      "text": "12",
+      "delay": 0.014
+    }
+  },
+  "6bda74fe7dd03a5751634b399425eab6993497a972d22115476b43fc48ed82a7": {
+    "steady": {
+      "text": "False",
+      "delay": 0.049
+    },
+    "hasty": {
+      "text": "false",
+      "delay": 0.017
+    }
+  },
+  "139d16de1b2b59c82be583882535cf4416df56e4f15134a63a0ef169a5869929": {
+    "steady": {
+      "text": "4",
+      "delay": 0.025
+    },
+    "hasty": {
+      "text": "4",
+      "delay": 0.008
+    }
+  }
+}

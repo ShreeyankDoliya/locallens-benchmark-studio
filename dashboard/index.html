@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="LocalLens: transparent, reproducible local LLM benchmarks. Compare results and inspect the evidence behind every score.">
+  <meta name="theme-color" content="#131a20">
+  <title>LocalLens · LLM Benchmark Studio</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to results</a>
+<aside class="sidebar">
+  <a class="brand" href="./"><span class="logo" aria-hidden="true">◈</span><span>LocalLens<small>LLM BENCHMARK STUDIO</small></span></a>
+  <div class="workspace-label">WORKSPACE</div>
+  <nav aria-label="Main navigation">
+    <a class="nav-link active" href="#overview"><span aria-hidden="true">▦</span> Overview <span class="nav-count" id="run-count">0</span></a>
+    <a class="nav-link" href="#explorer"><span aria-hidden="true">⌕</span> Task explorer</a>
+    <a class="nav-link" href="#methodology"><span aria-hidden="true">≡</span> Methodology</a>
+  </nav>
+  <div class="sidebar-note"><span class="status-dot"></span> Local inference. Open evidence.<p>Evaluations run on your computer.<br>This site displays published results.</p><a href="https://github.com/ShreeyankDoliya/locallens-benchmark-studio" target="_blank" rel="noopener">View source <span aria-hidden="true">↗</span></a></div>
+  <div class="sidebar-footer"><span class="avatar">SD</span><span>Shreeyank Doliya<small>Built for reproducible research</small></span></div>
+</aside>
+<div class="page">
+  <header class="topbar"><span>Workspace <span class="slash">/</span> <strong>Benchmark overview</strong></span><span class="local-badge"><span class="status-dot"></span> STATIC REPORT</span></header>
+  <main id="main">
+    <section id="overview">
+      <div class="heading-row"><div><div class="eyebrow">MEASURE. COMPARE. UNDERSTAND.</div><h1>Every score has a story<span>.</span></h1><p class="subtitle">Compare local models. Look past the average. Inspect the evidence.</p></div><a id="download-report" class="button primary" download>↓ Download report</a></div>
+      <div id="notice" class="notice" role="status">Loading published benchmark results…</div>
+      <div class="run-controls"><div class="control"><label for="run-select">PRIMARY RUN</label><select id="run-select"></select></div><div class="control"><label for="compare-select">COMPARE WITH</label><select id="compare-select"><option value="">No comparison</option></select></div><div class="run-meta" id="run-meta"></div></div>
+      <div id="comparison-note" class="comparison-note" hidden></div>
+      <div id="metrics" class="metrics"></div>
+      <div class="section-heading"><h2>Model comparison <span class="pill">DETERMINISTIC</span></h2><span id="score-note">Pass rate · all completed tasks</span></div>
+      <div class="panel comparison-panel"><div class="table-scroll"><table id="model-table"><caption class="sr-only">Aggregate scores by model and run</caption><thead><tr><th>Model / run</th><th>Pass rate</th><th>Passed</th><th>p50 latency</th><th>p95 latency</th><th>Error rate</th><th>Est. cost</th></tr></thead><tbody></tbody></table></div></div>
+      <div class="chart-grid"><section class="panel"><div class="panel-heading"><h2>Performance by category</h2><span>Pass rate</span></div><div id="category-chart" class="category-chart"></div></section><section class="panel"><div class="panel-heading"><h2>Latency distribution</h2><span>Successful requests</span></div><div id="latency-chart" class="latency-chart"></div><div class="chart-footnote">Final request time, including loading; excludes retries and queue time.</div></section></div>
+      <section class="panel consistency-panel"><div><h2>Stable across prompt variations?</h2><p>Equal pass/fail outcomes across complete perturbation groups. Consistent failures also count.</p></div><div id="consistency"></div></section>
+    </section>
+    <section id="explorer">
+      <div class="section-heading"><div><div class="eyebrow">FOLLOW THE EVIDENCE</div><h2 class="large">Task explorer</h2></div><span id="result-count"></span></div>
+      <div class="panel"><div class="filters"><div class="search-wrap"><label class="sr-only" for="search">Search tasks and responses</label><input id="search" type="search" placeholder="Search tasks, prompts, responses…"></div><label class="sr-only" for="model-filter">Filter model</label><select id="model-filter"><option value="">All models</option></select><label class="sr-only" for="category-filter">Filter category</label><select id="category-filter"><option value="">All categories</option></select><label class="sr-only" for="outcome-filter">Filter outcome</label><select id="outcome-filter"><option value="">All outcomes</option><option value="failed">Failures only</option><option value="passed">Passed only</option><option value="error">Provider errors</option><option value="disagreement">Model disagreements</option></select></div>
+      <div class="table-scroll"><table id="task-table"><caption class="sr-only">Task results; use Inspect to view all evidence</caption><thead><tr><th>Task</th><th>Model / run</th><th>Category</th><th>Result</th><th>Latency</th><th><span class="sr-only">Inspect task</span></th></tr></thead><tbody></tbody></table></div><div id="empty" class="empty" hidden>No results match these filters. Try another category or clear your search.</div><div class="table-bottom">Each result links to its original prompt, response, expected answer, and scoring rule.<button id="clear-filters" class="text-button">Reset filters</button></div></div>
+    </section>
+    <section id="methodology" class="methodology"><div><div class="eyebrow">TRANSPARENCY BY DEFAULT</div><h2>A benchmark, with boundaries.</h2><p>This small, original dataset is a diagnostic tool. It does not establish overall model superiority. Deterministic checks measure compliance with explicit answers and formats; they do not measure broad intelligence, safety, or real-world coding ability.</p><a href="https://github.com/ShreeyankDoliya/locallens-benchmark-studio/blob/main/docs/METHODOLOGY.md">Read the methodology ↗</a></div><div><h3>Recorded with every run</h3><ul><li>Versioned tasks and dataset fingerprint</li><li>Model digest, prompt template, and generation settings</li><li>Host details, timing, errors, and retry history</li><li>Individual deterministic judgments and explanations</li></ul><details><summary>Run provenance & hardware</summary><pre id="provenance"></pre></details><a id="download-json" download>Download raw JSON ↗</a></div></section>
+    <footer><span><strong>LocalLens</strong> · LLM Benchmark Studio</span><span>Local execution. Reproducible reports. No API key required.</span></footer>
+  </main>
+</div>
+<dialog id="detail-dialog" aria-labelledby="detail-title"><div class="dialog-heading"><div><div class="eyebrow">TASK EVIDENCE</div><h2 id="detail-title"></h2></div><button id="close-dialog" class="icon-button" aria-label="Close task details">×</button></div><div id="detail-content"></div></dialog>
+</body>
+</html>

@@ -1,0 +1,1824 @@
+{
+  "schema_version": 1,
+  "run": {
+    "id": "mock-repeat",
+    "created_at": "2026-09-29T08:12:16.706518+00:00",
+    "updated_at": "2026-09-29T08:12:19.086093+00:00",
+    "status": "completed",
+    "snapshot": {
+      "config": {
+        "concurrency": 1,
+        "hardware_notes": "Scripted mock demo on the recorded host. Delays are synthetic; no inference, GPU use, or token estimates.",
+        "models": [
+          {
+            "id": "mock-steady",
+            "input_per_million": null,
+            "model": "steady",
+            "options": {
+              "num_ctx": 2048,
+              "num_predict": 256,
+              "seed": 42,
+              "temperature": 0
+            },
+            "output_per_million": null,
+            "provider": "mock"
+          },
+          {
+            "id": "mock-hasty",
+            "input_per_million": null,
+            "model": "hasty",
+            "options": {
+              "num_ctx": 2048,
+              "num_predict": 256,
+              "seed": 42,
+              "temperature": 0
+            },
+            "output_per_million": null,
+            "provider": "mock"
+          }
+        ],
+        "name": "Mock demonstration",
+        "requests_per_second": 50.0,
+        "retries": 2,
+        "timeout_seconds": 5.0
+      },
+      "config_sha256": "8dca15199576a1e10e9b70592f7cd9d43039afa5cea82c97b5c0b34e23bbae84",
+      "dataset_sha256": "029a3f01fdef201fc489dc4b170e0b5a1c413752ce58d08a35308b96b8f1e479",
+      "dataset_version": "studio-sample-v1",
+      "engine_sha256": "ec8d184daa74abe35b876fdf5aa3fd96dfff86e39623959d22d4339fcfd3dda0",
+      "hardware": {
+        "architecture": "arm64",
+        "cpu": "arm",
+        "logical_cpus": 8,
+        "os": "macOS-26.6.2-arm64-arm-64bit",
+        "python": "3.12.13",
+        "ram_bytes": 17179869184
+      },
+      "model_manifests": {
+        "mock-hasty": {
+          "digest": "4feee9a0608859355a9fcace3fdc3a7413e2a032fb4d22671671ef0830911cf4",
+          "model": "hasty",
+          "provider": "mock",
+          "synthetic": true,
+          "version": "scripted-v1"
+        },
+        "mock-steady": {
+          "digest": "4feee9a0608859355a9fcace3fdc3a7413e2a032fb4d22671671ef0830911cf4",
+          "model": "steady",
+          "provider": "mock",
+          "synthetic": true,
+          "version": "scripted-v1"
+        }
+      },
+      "schema_version": 1,
+      "scorer_version": "deterministic-v1",
+      "studio_version": "0.1.0",
+      "tasks": [
+        {
+          "category": "instruction_following",
+          "dataset_version": "studio-sample-v1",
+          "expected": "alder,birch,cedar",
+          "group": "if-sort",
+          "id": "if-sort",
+          "prompt": "Sort these labels alphabetically: cedar, birch, alder. Reply only with lowercase labels separated by commas and no spaces.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "instruction_following",
+          "dataset_version": "studio-sample-v1",
+          "expected": "alder,birch,cedar",
+          "group": "if-sort",
+          "id": "if-sort-paraphrase",
+          "prompt": "Put birch, cedar, and alder in alphabetical order. Output lowercase, comma-separated text without spaces or commentary.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "paraphrase"
+        },
+        {
+          "category": "instruction_following",
+          "dataset_version": "studio-sample-v1",
+          "expected": "amber|ink",
+          "group": "if-select",
+          "id": "if-select",
+          "prompt": "From [moss, amber, cloud, ink], return only the second and fourth items, joined by |.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "instruction_following",
+          "dataset_version": "studio-sample-v1",
+          "expected": "amber|ink",
+          "group": "if-select",
+          "id": "if-select-noise",
+          "prompt": "A bicycle has two wheels. From [moss, amber, cloud, ink], return only the second and fourth items, joined by |.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "irrelevant_context"
+        },
+        {
+          "category": "structured_output",
+          "dataset_version": "studio-sample-v1",
+          "expected": {
+            "available": true,
+            "count": 3,
+            "item": "pencil"
+          },
+          "group": "json-stock",
+          "id": "json-stock",
+          "prompt": "Return only JSON with keys item (string), count (integer), and available (boolean). The item is \"pencil\", count is 3, and it is available. No extra keys.",
+          "rubric": "Match the expected answer under the documented json check.",
+          "scoring": "json",
+          "variant": "base"
+        },
+        {
+          "category": "structured_output",
+          "dataset_version": "studio-sample-v1",
+          "expected": {
+            "available": true,
+            "count": 3,
+            "item": "pencil"
+          },
+          "group": "json-stock",
+          "id": "json-stock-paraphrase",
+          "prompt": "Encode an available stock of three pencils as JSON only: item must be \"pencil\", count must be integer 3, available must be boolean true. Use exactly those three keys.",
+          "rubric": "Match the expected answer under the documented json check.",
+          "scoring": "json",
+          "variant": "paraphrase"
+        },
+        {
+          "category": "structured_output",
+          "dataset_version": "studio-sample-v1",
+          "expected": [
+            4,
+            9,
+            16
+          ],
+          "group": "json-array",
+          "id": "json-array",
+          "prompt": "Return just a JSON array containing the squares of 2, 3, and 4 in that order.",
+          "rubric": "Match the expected answer under the documented json check.",
+          "scoring": "json",
+          "variant": "base"
+        },
+        {
+          "category": "structured_output",
+          "dataset_version": "studio-sample-v1",
+          "expected": {
+            "attendees": []
+          },
+          "group": "json-empty",
+          "id": "json-empty",
+          "prompt": "No attendees registered. Return only JSON with exactly one key, attendees, whose value is an empty array.",
+          "rubric": "Match the expected answer under the documented json check.",
+          "scoring": "json",
+          "variant": "base"
+        },
+        {
+          "category": "reasoning",
+          "dataset_version": "studio-sample-v1",
+          "expected": "19",
+          "group": "reason-crates",
+          "id": "reason-crates",
+          "prompt": "A depot has 4 crates of 6 lanterns. Seven lanterns are shipped and two returned. How many lanterns remain? Reply with the integer only.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "reasoning",
+          "dataset_version": "studio-sample-v1",
+          "expected": "19",
+          "group": "reason-crates",
+          "id": "reason-crates-noise",
+          "prompt": "The depot door is blue and opens at 8 AM. A depot has 4 crates of 6 lanterns. Seven lanterns are shipped and two returned. How many lanterns remain? Reply with the integer only.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "irrelevant_context"
+        },
+        {
+          "category": "reasoning",
+          "dataset_version": "studio-sample-v1",
+          "expected": "Taro",
+          "group": "reason-order",
+          "id": "reason-order",
+          "prompt": "Mira arrived before Taro. Taro arrived before Lin. Lin arrived before Omi. Who arrived second? Return only the name.",
+          "rubric": "Match the expected answer under the documented normalized check.",
+          "scoring": "normalized",
+          "variant": "base"
+        },
+        {
+          "category": "reasoning",
+          "dataset_version": "studio-sample-v1",
+          "expected": "17",
+          "group": "reason-mod",
+          "id": "reason-mod",
+          "prompt": "A counter starts at 2 and adds 3 on each of five steps. What is the final value? Reply with the integer only.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "grounding",
+          "dataset_version": "studio-sample-v1",
+          "expected": "10:30",
+          "group": "ground-open",
+          "id": "ground-open",
+          "prompt": "Use only this context: The fictional Fern Archive opens at 10:30 on Sundays and 09:00 on Mondays. What time does it open on Sunday? Answer only with HH:MM.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "grounding",
+          "dataset_version": "studio-sample-v1",
+          "expected": "10:30",
+          "group": "ground-open",
+          "id": "ground-open-noise",
+          "prompt": "Use only this context: The fictional Fern Archive opens at 10:30 on Sundays and 09:00 on Mondays. The nearby bakery opens at 07:00 daily. What time does the archive open on Sunday? Answer only with HH:MM.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "irrelevant_context"
+        },
+        {
+          "category": "grounding",
+          "dataset_version": "studio-sample-v1",
+          "expected": "UNKNOWN",
+          "group": "ground-unknown",
+          "id": "ground-unknown",
+          "prompt": "Use only this context: The fictional Luma ferry carries 30 passengers and sails on Tuesdays. What year was it built? If the context does not say, reply exactly UNKNOWN.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "grounding",
+          "dataset_version": "studio-sample-v1",
+          "expected": "Delta",
+          "group": "ground-owner",
+          "id": "ground-owner",
+          "prompt": "Context: The fictional Orin project is maintained by the Delta team. The Vega team only reviews documentation. Which team maintains Orin? Reply only with the team name.",
+          "rubric": "Match the expected answer under the documented normalized check.",
+          "scoring": "normalized",
+          "variant": "base"
+        },
+        {
+          "category": "code",
+          "dataset_version": "studio-sample-v1",
+          "expected": "10",
+          "group": "code-trace",
+          "id": "code-trace",
+          "prompt": "In Python 3, what does this print?\nx = [2, 4, 6]\nprint(sum(x[1:]))\nReturn only the printed value.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "code",
+          "dataset_version": "studio-sample-v1",
+          "expected": "10",
+          "group": "code-trace",
+          "id": "code-trace-paraphrase",
+          "prompt": "Predict the Python 3 output without explanation: values = [2, 4, 6]; print(sum(values[1:])). Return only the printed value.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "paraphrase"
+        },
+        {
+          "category": "code",
+          "dataset_version": "studio-sample-v1",
+          "expected": "False",
+          "group": "code-bool",
+          "id": "code-bool",
+          "prompt": "In Python 3, what does print(bool([])) output? Return only the printed value.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        },
+        {
+          "category": "code",
+          "dataset_version": "studio-sample-v1",
+          "expected": "4",
+          "group": "code-range",
+          "id": "code-range",
+          "prompt": "In Python 3, what does print(len(list(range(1, 8, 2)))) output? Return only the printed value.",
+          "rubric": "Return exactly the specified answer.",
+          "scoring": "exact",
+          "variant": "base"
+        }
+      ]
+    }
+  },
+  "summary": {
+    "models": [
+      {
+        "model_id": "mock-steady",
+        "completed": 20,
+        "planned": 20,
+        "passed": 19,
+        "pass_rate": 0.95,
+        "errors": 0,
+        "error_rate": 0.0,
+        "categories": {
+          "code": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 4,
+            "pass_rate": 1.0
+          },
+          "grounding": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 4,
+            "pass_rate": 1.0
+          },
+          "instruction_following": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 4,
+            "pass_rate": 1.0
+          },
+          "reasoning": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 3,
+            "pass_rate": 0.75
+          },
+          "structured_output": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 4,
+            "pass_rate": 1.0
+          }
+        },
+        "latency_ms": {
+          "p50": 37.88043756503612,
+          "p90": 50.134278973564506,
+          "p95": 50.13848366797902,
+          "samples": 20
+        },
+        "cost_usd": null,
+        "cost_covered_results": 0,
+        "consistency": {
+          "complete_groups": 6,
+          "same_pass_outcome": 6,
+          "all_pass": 6
+        }
+      },
+      {
+        "model_id": "mock-hasty",
+        "completed": 20,
+        "planned": 20,
+        "passed": 9,
+        "pass_rate": 0.45,
+        "errors": 1,
+        "error_rate": 0.05,
+        "categories": {
+          "code": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 2,
+            "pass_rate": 0.5
+          },
+          "grounding": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 2,
+            "pass_rate": 0.5
+          },
+          "instruction_following": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 2,
+            "pass_rate": 0.5
+          },
+          "reasoning": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 2,
+            "pass_rate": 0.5
+          },
+          "structured_output": {
+            "completed": 4,
+            "planned": 4,
+            "passed": 1,
+            "pass_rate": 0.25
+          }
+        },
+        "latency_ms": {
+          "p50": 14.66275006532669,
+          "p90": 18.11801642179489,
+          "p95": 18.139200087171048,
+          "samples": 19
+        },
+        "cost_usd": null,
+        "cost_covered_results": 0,
+        "consistency": {
+          "complete_groups": 6,
+          "same_pass_outcome": 0,
+          "all_pass": 0
+        }
+      }
+    ],
+    "disagreements": [
+      "code-bool",
+      "code-trace-paraphrase",
+      "ground-open-noise",
+      "ground-unknown",
+      "if-select",
+      "if-sort-paraphrase",
+      "json-array",
+      "json-empty",
+      "json-stock-paraphrase",
+      "reason-crates-noise"
+    ]
+  },
+  "results": [
+    {
+      "completed_at": "2026-09-29T08:12:19.074214+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 18.10579199809581,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "false",
+      "run_id": "mock-repeat",
+      "task_id": "code-bool",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:19.074177+00:00",
+          "error": null,
+          "latency_ms": 18.10579199809581,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:19.055852+00:00",
+          "status": "success",
+          "id": 85
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:19.085303+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 9.082875098101795,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "4",
+      "run_id": "mock-repeat",
+      "task_id": "code-range",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:19.085271+00:00",
+          "error": null,
+          "latency_ms": 9.082875098101795,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:19.076046+00:00",
+          "status": "success",
+          "id": 86
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:19.026590+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 11.94212504196912,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "10",
+      "run_id": "mock-repeat",
+      "task_id": "code-trace",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:19.026560+00:00",
+          "error": null,
+          "latency_ms": 11.94212504196912,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:19.014345+00:00",
+          "status": "success",
+          "id": 83
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:19.051081+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 15.232833102345467,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "12",
+      "run_id": "mock-repeat",
+      "task_id": "code-trace-paraphrase",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:19.050984+00:00",
+          "error": null,
+          "latency_ms": 15.232833102345467,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:19.035358+00:00",
+          "status": "success",
+          "id": 84
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.683458+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 12.16620800551027,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "10:30",
+      "run_id": "mock-repeat",
+      "task_id": "ground-open",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.683402+00:00",
+          "error": null,
+          "latency_ms": 12.16620800551027,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.670911+00:00",
+          "status": "success",
+          "id": 78
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.707140+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 15.098375035449862,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "07:00",
+      "run_id": "mock-repeat",
+      "task_id": "ground-open-noise",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.707115+00:00",
+          "error": null,
+          "latency_ms": 15.098375035449862,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.691822+00:00",
+          "status": "success",
+          "id": 79
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:19.003858+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. NFKC Unicode normalization, case folding and whitespace collapsing; punctuation is retained.",
+        "kind": "deterministic",
+        "method": "normalized",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 9.166457923129201,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": " DELTA ",
+      "run_id": "mock-repeat",
+      "task_id": "ground-owner",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.741857+00:00",
+          "error": "Simulated temporary busy response",
+          "latency_ms": 9.13383299484849,
+          "retryable": true,
+          "started_at": "2026-09-29T08:12:18.732594+00:00",
+          "status": "error",
+          "id": 81
+        },
+        {
+          "ended_at": "2026-09-29T08:12:19.003795+00:00",
+          "error": null,
+          "latency_ms": 9.166457923129201,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.993532+00:00",
+          "status": "success",
+          "id": 82
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.730842+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 18.117083003744483,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "2020",
+      "run_id": "mock-repeat",
+      "task_id": "ground-unknown",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.730785+00:00",
+          "error": null,
+          "latency_ms": 18.117083003744483,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.712403+00:00",
+          "status": "success",
+          "id": 80
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.711119+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 18.296250025741756,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "amber, ink",
+      "run_id": "mock-repeat",
+      "task_id": "if-select",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.711085+00:00",
+          "error": null,
+          "latency_ms": 18.296250025741756,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.692690+00:00",
+          "status": "success",
+          "id": 66
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.721527+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 8.51808290462941,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "amber|ink",
+      "run_id": "mock-repeat",
+      "task_id": "if-select-noise",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.721506+00:00",
+          "error": null,
+          "latency_ms": 8.51808290462941,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.712872+00:00",
+          "status": "success",
+          "id": 67
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.663940+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 11.899792007170618,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "alder,birch,cedar",
+      "run_id": "mock-repeat",
+      "task_id": "if-sort",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.663918+00:00",
+          "error": null,
+          "latency_ms": 11.899792007170618,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.651820+00:00",
+          "status": "success",
+          "id": 64
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.687906+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 15.075416886247694,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "alder, birch, cedar",
+      "run_id": "mock-repeat",
+      "task_id": "if-sort-paraphrase",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.687886+00:00",
+          "error": null,
+          "latency_ms": 15.075416886247694,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.672606+00:00",
+          "status": "success",
+          "id": 65
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.793377+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Invalid strict JSON: Expecting value: line 1 column 1 (char 0)",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 18.106999923475087,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "```json\n[4,9,16]\n```",
+      "run_id": "mock-repeat",
+      "task_id": "json-array",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.793295+00:00",
+          "error": null,
+          "latency_ms": 18.106999923475087,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.774985+00:00",
+          "status": "success",
+          "id": 70
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.577427+00:00",
+      "error": "Simulated local server unavailable",
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "Provider error; counted as a failed task. No answer was scored.",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 9.238915983587503,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {},
+      "response": null,
+      "run_id": "mock-repeat",
+      "task_id": "json-empty",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.804237+00:00",
+          "error": "Simulated local server unavailable",
+          "latency_ms": 8.960000006482005,
+          "retryable": true,
+          "started_at": "2026-09-29T08:12:17.795175+00:00",
+          "status": "error",
+          "id": 71
+        },
+        {
+          "ended_at": "2026-09-29T08:12:18.065555+00:00",
+          "error": "Simulated local server unavailable",
+          "latency_ms": 9.117666981182992,
+          "retryable": true,
+          "started_at": "2026-09-29T08:12:18.055642+00:00",
+          "status": "error",
+          "id": 72
+        },
+        {
+          "ended_at": "2026-09-29T08:12:18.577414+00:00",
+          "error": "Simulated local server unavailable",
+          "latency_ms": 9.238915983587503,
+          "retryable": true,
+          "started_at": "2026-09-29T08:12:18.567017+00:00",
+          "status": "error",
+          "id": 73
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.745486+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Strict JSON structural equality; key order ignored; extra keys, duplicate keys, type changes and markdown fences fail.",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 11.663916055113077,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "{\"item\":\"pencil\",\"count\":3,\"available\":true}",
+      "run_id": "mock-repeat",
+      "task_id": "json-stock",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.745417+00:00",
+          "error": null,
+          "latency_ms": 11.663916055113077,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.733499+00:00",
+          "status": "success",
+          "id": 68
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.769662+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Strict JSON structural equality; key order ignored; extra keys, duplicate keys, type changes and markdown fences fail.",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 14.988875016570091,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "{\"item\":\"pencil\",\"count\":\"3\",\"available\":true}",
+      "run_id": "mock-repeat",
+      "task_id": "json-stock-paraphrase",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.769565+00:00",
+          "error": null,
+          "latency_ms": 14.988875016570091,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.754394+00:00",
+          "status": "success",
+          "id": 69
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.600423+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 12.097042053937912,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "19",
+      "run_id": "mock-repeat",
+      "task_id": "reason-crates",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.600372+00:00",
+          "error": null,
+          "latency_ms": 12.097042053937912,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.588028+00:00",
+          "status": "success",
+          "id": 74
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.624214+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 14.66275006532669,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "17",
+      "run_id": "mock-repeat",
+      "task_id": "reason-crates-noise",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.624171+00:00",
+          "error": null,
+          "latency_ms": 14.66275006532669,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.609041+00:00",
+          "status": "success",
+          "id": 75
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.658805+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 8.863333030603826,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "15",
+      "run_id": "mock-repeat",
+      "task_id": "reason-mod",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.658789+00:00",
+          "error": null,
+          "latency_ms": 8.863333030603826,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.649811+00:00",
+          "status": "success",
+          "id": 77
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:18.648096+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. NFKC Unicode normalization, case folding and whitespace collapsing; punctuation is retained.",
+        "kind": "deterministic",
+        "method": "normalized",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 18.121750093996525,
+      "model_id": "mock-hasty",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "Taro",
+      "run_id": "mock-repeat",
+      "task_id": "reason-order",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:18.648033+00:00",
+          "error": null,
+          "latency_ms": 18.121750093996525,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:18.629654+00:00",
+          "status": "success",
+          "id": 76
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.624168+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 50.13829201925546,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "False",
+      "run_id": "mock-repeat",
+      "task_id": "code-bool",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.624124+00:00",
+          "error": null,
+          "latency_ms": 50.13829201925546,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.573544+00:00",
+          "status": "success",
+          "id": 62
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.651088+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 26.304375031031668,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "4",
+      "run_id": "mock-repeat",
+      "task_id": "code-range",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.651022+00:00",
+          "error": null,
+          "latency_ms": 26.304375031031668,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.624556+00:00",
+          "status": "success",
+          "id": 63
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.528117+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 37.68579207826406,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "10",
+      "run_id": "mock-repeat",
+      "task_id": "code-trace",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.528077+00:00",
+          "error": null,
+          "latency_ms": 37.68579207826406,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.490257+00:00",
+          "status": "success",
+          "id": 60
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.573065+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 44.238333008252084,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "10",
+      "run_id": "mock-repeat",
+      "task_id": "code-trace-paraphrase",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.572988+00:00",
+          "error": null,
+          "latency_ms": 44.238333008252084,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.528606+00:00",
+          "status": "success",
+          "id": 61
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.379877+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 44.119041063822806,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "10:30",
+      "run_id": "mock-repeat",
+      "task_id": "ground-open",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.379843+00:00",
+          "error": null,
+          "latency_ms": 44.119041063822806,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.335564+00:00",
+          "status": "success",
+          "id": 56
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.430651+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 50.133833079598844,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "10:30",
+      "run_id": "mock-repeat",
+      "task_id": "ground-open-noise",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.430614+00:00",
+          "error": null,
+          "latency_ms": 50.133833079598844,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.380325+00:00",
+          "status": "success",
+          "id": 57
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.489887+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. NFKC Unicode normalization, case folding and whitespace collapsing; punctuation is retained.",
+        "kind": "deterministic",
+        "method": "normalized",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 31.61733306478709,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "Delta",
+      "run_id": "mock-repeat",
+      "task_id": "ground-owner",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.489852+00:00",
+          "error": null,
+          "latency_ms": 31.61733306478709,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.458044+00:00",
+          "status": "success",
+          "id": 59
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.457655+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 26.13266697153449,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "UNKNOWN",
+      "run_id": "mock-repeat",
+      "task_id": "ground-unknown",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.457622+00:00",
+          "error": null,
+          "latency_ms": 26.13266697153449,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.431314+00:00",
+          "status": "success",
+          "id": 58
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:16.823678+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 44.129875022917986,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "amber|ink",
+      "run_id": "mock-repeat",
+      "task_id": "if-select",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:16.823649+00:00",
+          "error": null,
+          "latency_ms": 44.129875022917986,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:16.779372+00:00",
+          "status": "success",
+          "id": 46
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:16.874307+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 50.10862508788705,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "amber|ink",
+      "run_id": "mock-repeat",
+      "task_id": "if-select-noise",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:16.874276+00:00",
+          "error": null,
+          "latency_ms": 50.10862508788705,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:16.824096+00:00",
+          "status": "success",
+          "id": 47
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:16.740239+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 32.15937491040677,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "alder,birch,cedar",
+      "run_id": "mock-repeat",
+      "task_id": "if-sort",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:16.740191+00:00",
+          "error": null,
+          "latency_ms": 32.15937491040677,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:16.707911+00:00",
+          "status": "success",
+          "id": 44
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:16.778971+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 38.18445897195488,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "alder,birch,cedar",
+      "run_id": "mock-repeat",
+      "task_id": "if-sort-paraphrase",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:16.778932+00:00",
+          "error": null,
+          "latency_ms": 38.18445897195488,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:16.740619+00:00",
+          "status": "success",
+          "id": 45
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:16.971558+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Strict JSON structural equality; key order ignored; extra keys, duplicate keys, type changes and markdown fences fail.",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 38.07508305180818,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "[4,9,16]",
+      "run_id": "mock-repeat",
+      "task_id": "json-array",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:16.971511+00:00",
+          "error": null,
+          "latency_ms": 38.07508305180818,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:16.933323+00:00",
+          "status": "success",
+          "id": 50
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.187290+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Strict JSON structural equality; key order ignored; extra keys, duplicate keys, type changes and markdown fences fail.",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 44.1548329545185,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "{\"attendees\":[]}",
+      "run_id": "mock-repeat",
+      "task_id": "json-empty",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.187185+00:00",
+          "error": null,
+          "latency_ms": 44.1548329545185,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.142851+00:00",
+          "status": "success",
+          "id": 51
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:16.900911+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Strict JSON structural equality; key order ignored; extra keys, duplicate keys, type changes and markdown fences fail.",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 26.10091702081263,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "{\"item\":\"pencil\",\"count\":3,\"available\":true}",
+      "run_id": "mock-repeat",
+      "task_id": "json-stock",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:16.900833+00:00",
+          "error": null,
+          "latency_ms": 26.10091702081263,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:16.874627+00:00",
+          "status": "success",
+          "id": 48
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:16.932967+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Strict JSON structural equality; key order ignored; extra keys, duplicate keys, type changes and markdown fences fail.",
+        "kind": "deterministic",
+        "method": "json",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 31.607500044628978,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "{\"item\":\"pencil\",\"count\":3,\"available\":true}",
+      "run_id": "mock-repeat",
+      "task_id": "json-stock-paraphrase",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:16.932914+00:00",
+          "error": null,
+          "latency_ms": 31.607500044628978,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:16.901206+00:00",
+          "status": "success",
+          "id": 49
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.237990+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 50.14212499372661,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "19",
+      "run_id": "mock-repeat",
+      "task_id": "reason-crates",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.237959+00:00",
+          "error": null,
+          "latency_ms": 50.14212499372661,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.187642+00:00",
+          "status": "success",
+          "id": 52
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.264729+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 26.089833001606166,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "19",
+      "run_id": "mock-repeat",
+      "task_id": "reason-crates-noise",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.264699+00:00",
+          "error": null,
+          "latency_ms": 26.089833001606166,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.238461+00:00",
+          "status": "success",
+          "id": 53
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.335086+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "FAIL. Literal string equality; whitespace and case are significant.",
+        "kind": "deterministic",
+        "method": "exact",
+        "passed": false,
+        "score": 0.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 37.2194170486182,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "15",
+      "run_id": "mock-repeat",
+      "task_id": "reason-mod",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.335040+00:00",
+          "error": null,
+          "latency_ms": 37.2194170486182,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.297690+00:00",
+          "status": "success",
+          "id": 55
+        }
+      ]
+    },
+    {
+      "completed_at": "2026-09-29T08:12:17.297366+00:00",
+      "error": null,
+      "input_tokens": null,
+      "judgment": {
+        "explanation": "PASS. NFKC Unicode normalization, case folding and whitespace collapsing; punctuation is retained.",
+        "kind": "deterministic",
+        "method": "normalized",
+        "passed": true,
+        "score": 1.0,
+        "version": "deterministic-v1"
+      },
+      "latency_ms": 32.079707947559655,
+      "model_id": "mock-steady",
+      "output_tokens": null,
+      "provider_metadata": {
+        "synthetic": true,
+        "usage": "unavailable"
+      },
+      "response": "Taro",
+      "run_id": "mock-repeat",
+      "task_id": "reason-order",
+      "attempts": [
+        {
+          "ended_at": "2026-09-29T08:12:17.297315+00:00",
+          "error": null,
+          "latency_ms": 32.079707947559655,
+          "retryable": false,
+          "started_at": "2026-09-29T08:12:17.265119+00:00",
+          "status": "success",
+          "id": 54
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "name": "Local Qwen comparison",
+  "models": [
+    {
+      "id": "qwen-0.5b",
+      "provider": "ollama",
+      "model": "qwen2.5:0.5b",
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 2048
+      }
+    },
+    {
+      "id": "qwen-1.5b",
+      "provider": "ollama",
+      "model": "qwen2.5:1.5b",
+      "options": {
+        "temperature": 0,
+        "seed": 42,
+        "num_predict": 256,
+        "num_ctx": 2048
+      }
+    }
+  ],
+  "concurrency": 1,
+  "requests_per_second": 1.0,
+  "timeout_seconds": 180.0,
+  "retries": 2,
+  "hardware_notes": "EDIT before running: CPU / GPU model, RAM / VRAM, power mode, and other workload. Automatic host details are also recorded."
+}

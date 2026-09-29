@@ -1,0 +1,70 @@
+name: Test and deploy LocalLens
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Python ${{ matrix.python }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          cache: pip
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pip install --no-deps -e .
+      - run: python -m unittest discover -s tests -v
+      - run: llm-bench validate datasets/studio-sample-v1.jsonl
+      - run: llm-bench run --config configs/mock.json --run-id ci-smoke --max-tasks 7
+      - run: llm-bench run --run-id ci-smoke --resume
+      - run: llm-bench export --run-id ci-smoke --output runs/ci-export
+      - run: llm-bench report runs/ci-export/ci-smoke.json --output runs/ci-report.md
+      - run: cmp runs/ci-export/ci-smoke.md runs/ci-report.md
+      - run: llm-bench report dashboard/data/mock-demo.json --output runs/published-report.md
+      - run: cmp dashboard/data/mock-demo.md runs/published-report.md
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:ui
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: [python, browser]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dashboard
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,20 @@
+{
+  "name": "Mock demonstration",
+  "models": [
+    {
+      "id": "mock-steady",
+      "provider": "mock",
+      "model": "steady"
+    },
+    {
+      "id": "mock-hasty",
+      "provider": "mock",
+      "model": "hasty"
+    }
+  ],
+  "concurrency": 1,
+  "requests_per_second": 50.0,
+  "timeout_seconds": 5.0,
+  "retries": 2,
+  "hardware_notes": "Scripted mock demo on the recorded host. Delays are synthetic; no inference, GPU use, or token estimates."
+}
