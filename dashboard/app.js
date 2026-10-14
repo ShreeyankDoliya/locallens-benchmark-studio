@@ -152,6 +152,21 @@ function renderRows() {
     row.append(task, model, el('td', labels[r.task.category] || r.task.category, 'subtle'), outcome, el('td', ms(r.latency_ms), 'mono'), action); return row;
   }));
 }
+function csvCell(value) {
+  if (value == null) return '';
+  let text = typeof value === 'string' ? value : typeof value === 'number' ? String(value) : JSON.stringify(value);
+  // Model text is untrusted; keep spreadsheets from evaluating it as a formula.
+  if (typeof value === 'string' && /^[=+\-@\t\r]/.test(text)) text = `'${text}`;
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+function downloadCsv() {
+  const header = ['run_id', 'model_id', 'task_id', 'category', 'variant', 'outcome', 'latency_ms', 'input_tokens', 'output_tokens', 'attempts', 'prompt', 'expected', 'response', 'error'];
+  const lines = state.filtered.map(r => [r.run_id, r.model_id, r.task_id, r.task.category, r.task.variant, r.error ? 'error' : r.judgment.passed ? 'pass' : 'fail', r.latency_ms, r.input_tokens, r.output_tokens, r.attempts.length, r.task.prompt, r.task.expected, r.response, r.error].map(csvCell).join(','));
+  const url = URL.createObjectURL(new Blob([[header.join(','), ...lines].join('\r\n') + '\r\n'], { type: 'text/csv;charset=utf-8' }));
+  const link = el('a'); link.href = url; link.download = `${state.primary.run.id}${state.comparison && state.comparison.run.id !== state.primary.run.id ? `-vs-${state.comparison.run.id}` : ''}-results.csv`;
+  document.body.append(link); link.click(); link.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 0);
+}
 function showDetail(r) {
   $('#detail-title').textContent = r.task_id;
   const content = $('#detail-content'); content.replaceChildren(el('div', `${r.model_id} · ${r.run_id} · ${r.task.variant.replaceAll('_', ' ')} · ${r.attempts.length} attempt(s) · ${ms(r.latency_ms)}`, 'detail-meta'));
@@ -172,6 +187,12 @@ $('#run-select').addEventListener('change', selectRuns);
 $('#compare-select').addEventListener('change', selectRuns);
 for (const id of ['search', 'model-filter', 'category-filter', 'outcome-filter']) $(`#${id}`).addEventListener(id === 'search' ? 'input' : 'change', renderRows);
 $('#clear-filters').addEventListener('click', () => { for (const id of ['search', 'model-filter', 'category-filter', 'outcome-filter']) $(`#${id}`).value = ''; renderRows(); refreshSelects(); });
+$('#download-csv').addEventListener('click', () => { if (state.primary) downloadCsv(); });
+document.addEventListener('keydown', event => {
+  if (event.key !== '/' || event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || $('#detail-dialog').open) return;
+  if (event.target.closest('input, textarea, select, [contenteditable], [role=listbox]')) return;
+  event.preventDefault(); $('#search').focus(); $('#search').select();
+});
 $('#close-dialog').addEventListener('click', () => $('#detail-dialog').close());
 $('#detail-dialog').addEventListener('click', event => { if (event.target === $('#detail-dialog')) { const rect = event.target.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) event.target.close(); } });
 for (const link of document.querySelectorAll('.nav-link')) link.addEventListener('click', () => { document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active')); link.classList.add('active'); });

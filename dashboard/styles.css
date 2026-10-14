@@ -21,3 +21,4 @@
 .select-check{color:#50723a;font-weight:700;flex-shrink:0;min-width:11px}
 .filters .themed-select{max-width:190px;min-width:125px}
 @media(max-width:760px){.filters .themed-select{flex:1;max-width:100%;min-width:100px}.select-trigger{min-height:42px;font-size:11px}.select-option{min-height:44px}.control .select-trigger{font-size:10px}}
+.table-actions{display:flex;gap:14px;flex-wrap:wrap;justify-content:flex-end}

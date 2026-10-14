@@ -2,17 +2,45 @@
 import argparse
 import asyncio
 import json
+import os
 from pathlib import Path
 import re
 import sqlite3
 import sys
 from datetime import datetime, timezone
 
-from .analysis import export_run, markdown_report, verify_export
+from .analysis import compare_runs, export_run, markdown_report, verify_export
 from .models import RunConfig, load_dataset, strict_json
 from .providers import ProviderError
 from .runner import execute
 from .storage import Store
+
+
+def can_print(text: str) -> bool:
+    try:
+        text.encode(sys.stdout.encoding or 'ascii')
+        return True
+    except (UnicodeEncodeError, LookupError):
+        return False
+
+
+def terminal_color() -> bool:
+    """ANSI colors only for an interactive terminal; honors NO_COLOR."""
+    if os.environ.get('NO_COLOR') or not sys.stdout.isatty():
+        return False
+    if os.name == 'nt':
+        # Older Windows consoles need virtual terminal processing switched on.
+        try:
+            import ctypes
+            kernel = ctypes.windll.kernel32
+            handle = kernel.GetStdHandle(-11)
+            mode = ctypes.c_uint32()
+            if not kernel.GetConsoleMode(handle, ctypes.byref(mode)):
+                return False
+            return bool(mode.value & 0x0004 or kernel.SetConsoleMode(handle, mode.value | 0x0004))
+        except (AttributeError, OSError):
+            return False
+    return True
 
 
 def main() -> None:
@@ -36,6 +64,10 @@ def main() -> None:
     report.add_argument('--output', type=Path, required=True)
     listing = sub.add_parser('list', help='List saved runs')
     listing.add_argument('--db', type=Path, default=Path('runs/studio.sqlite'))
+    compare = sub.add_parser('compare', help='Compare pass rates, latency and changed outcomes of two saved runs')
+    compare.add_argument('run_a')
+    compare.add_argument('run_b')
+    compare.add_argument('--db', type=Path, default=Path('runs/studio.sqlite'))
     args = parser.parse_args()
     store = None
     try:
@@ -54,10 +86,16 @@ def main() -> None:
         run_id = getattr(args, 'run_id', None)
         if run_id is not None and not re.fullmatch(r'[a-zA-Z0-9][a-zA-Z0-9_-]{0,79}', run_id):
             raise ValueError('run ID must be 1–80 letters, digits, underscores or hyphens')
+        if args.command in ('list', 'compare') and not args.db.exists():
+            raise ValueError(f'no database at {args.db}; run llm-bench run first')
         store = Store(args.db)
         if args.command == 'list':
-            for row in store.db.execute('SELECT id,status,created_at FROM runs ORDER BY created_at'):
-                print(' | '.join(row))
+            for run_id, status, created_at, snapshot in store.db.execute('SELECT id,status,created_at,snapshot FROM runs ORDER BY created_at'):
+                snap = json.loads(snapshot)
+                done = store.db.execute('SELECT COUNT(*) FROM results WHERE run_id=?', (run_id,)).fetchone()[0]
+                print(f'{run_id} | {status} | {created_at} | {done}/{len(snap["tasks"]) * len(snap["config"]["models"])} results')
+        elif args.command == 'compare':
+            print(compare_runs(store, args.run_a, args.run_b, color=terminal_color(), fancy=can_print('→─—')))
         elif args.command == 'export':
             print(export_run(store, run_id, args.output))
         else:

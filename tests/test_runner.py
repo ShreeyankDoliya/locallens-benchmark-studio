@@ -5,7 +5,7 @@ import tempfile
 import time
 import unittest
 
-from benchmark_studio.analysis import build_export, export_run, percentile, verify_export, markdown_report
+from benchmark_studio.analysis import build_export, compare_runs, export_run, percentile, verify_export, markdown_report
 from benchmark_studio.models import RunConfig, load_dataset
 from benchmark_studio.providers import Generation, ProviderError
 from benchmark_studio.runner import execute
@@ -173,6 +173,27 @@ class RunnerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(percentile([10,20,30,40],.5),25)
         self.assertEqual(percentile([10,20,30,40],.95),38.5)
         self.assertIsNone(percentile([],.5))
+
+    async def test_compare_runs_reports_rates_and_changed_outcomes(self):
+        await execute(self.store, 'before', self.tasks, self.config, factory=FakeProvider)
+        FakeProvider.mode = 'error'
+        await execute(self.store, 'after', self.tasks, self.config, factory=FakeProvider)
+        text = compare_runs(self.store, 'before', 'after')
+        self.assertIn('Run A  before  completed', text)
+        self.assertIn('0/2 (0%)', text)
+        self.assertRegex(text, r'−\d+ pts')
+        # Every earlier pass or fail became a provider error.
+        self.assertIn('4 tasks changed outcome:', text)
+        self.assertIn('→ error', text)
+        self.assertNotIn('Note:', text)
+        self.assertNotIn('\033[', text)
+        plain = compare_runs(self.store, 'before', 'after', fancy=False)
+        self.assertTrue(plain.isascii())
+        self.assertIn('-> error', plain)
+        self.assertIn('\033[31m', compare_runs(self.store, 'before', 'after', color=True))
+        self.assertIn('Every shared task had the same outcome', compare_runs(self.store, 'before', 'before'))
+        with self.assertRaisesRegex(ValueError, 'unknown run'):
+            compare_runs(self.store, 'before', 'missing')
 
 
     async def test_published_report_recomputation_detects_tampering(self):
