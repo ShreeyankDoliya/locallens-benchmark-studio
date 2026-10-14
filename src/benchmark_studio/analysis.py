@@ -60,6 +60,87 @@ def build_export(store: Store, run_id: str) -> dict:
     return {"schema_version": 1, "run": run, "summary": summarize(run["snapshot"], rows), "results": rows}
 
 
+def compare_runs(store: Store, run_a: str, run_b: str, *, color: bool = False, fancy: bool = True) -> str:
+    """Terminal comparison of two saved runs; models are matched by configured ID.
+
+    `color` adds ANSI styling; `fancy` allows non-ASCII arrows and rules.
+    """
+    runs = [store.run(r) for r in (run_a, run_b)]
+    results = [store.results(r) for r in (run_a, run_b)]
+    summaries = [{m["model_id"]: m for m in summarize(run["snapshot"], rows)["models"]} for run, rows in zip(runs, results)]
+    snaps = [run["snapshot"] for run in runs]
+    arrow, rule, dash = ('→', '─', '—') if fancy else ('->', '-', '-')
+    codes = {"bold": "1", "dim": "2", "green": "32", "red": "31", "yellow": "33"}
+    paint = lambda text, style: f'\033[{codes[style]}m{text}\033[0m' if color and text.strip() else text
+
+    lines = []
+    name_width = max(len(run_a), len(run_b))
+    for label, run in (('A', runs[0]), ('B', runs[1])):
+        when = run["created_at"][:16].replace('T', ' ') + ' UTC'
+        lines.append(f'{paint("Run " + label, "bold")}  {run["id"].ljust(name_width)}  {run["status"]:<11}  {paint(when, "dim")}')
+    lines.append('')
+    differences = [label for label, key in (("datasets", "dataset_sha256"), ("scorer versions", "scorer_version"), ("configurations", "config_sha256"), ("hardware", "hardware")) if snaps[0][key] != snaps[1][key]]
+    if differences:
+        lines += [paint(f'Note: the runs used different {", ".join(differences)}. Compare with care.', 'yellow'), '']
+
+    def score(m):
+        if not m:
+            return 'not in run', None
+        if m["pass_rate"] is None:
+            return 'no results', None
+        text = f'{m["passed"]}/{m["completed"]} ({m["pass_rate"]:.0%})'
+        return text + (f' of {m["planned"]}' if m["completed"] != m["planned"] else ''), None
+
+    def change(a, b):
+        if not a or not b or a["pass_rate"] is None or b["pass_rate"] is None:
+            return dash, None
+        points = round((b["pass_rate"] - a["pass_rate"]) * 100, 1)
+        if points == 0:
+            return 'same', 'dim'
+        text = f'{points:+g} pts'.replace('-', '−' if fancy else '-')
+        return text, 'green' if points > 0 else 'red'
+
+    def seconds(m):
+        value = m["latency_ms"]["p50"] if m else None
+        if value is None:
+            return dash
+        return f'{value:.0f} ms' if value < 1000 else f'{value / 1000:.2f} s'
+
+    models = list(dict.fromkeys([*summaries[0], *summaries[1]]))
+    header = ['Model', 'Run A score', 'Run B score', 'Change', 'Typical answer time (A ' + arrow + ' B)']
+    rows = []
+    for model in models:
+        a, b = summaries[0].get(model), summaries[1].get(model)
+        rows.append([(model, None), score(a), score(b), change(a, b), (f'{seconds(a)} {arrow} {seconds(b)}', None)])
+    widths = [max(len(header[i]), *(len(r[i][0]) for r in rows)) for i in range(len(header))]
+    # Pad before painting so escape codes never break column alignment.
+    lines.append('  '.join(paint(h.ljust(widths[i]), 'bold') for i, h in enumerate(header)).rstrip())
+    lines.append(paint(rule * (sum(widths) + 2 * (len(widths) - 1)), 'dim'))
+    for row in rows:
+        lines.append('  '.join(paint(text.ljust(widths[i]), style) if style else text.ljust(widths[i]) for i, (text, style) in enumerate(row)).rstrip())
+
+    outcome = lambda r: 'error' if r["error"] else 'pass' if r["judgment"]["passed"] else 'fail'
+    before = {(r["model_id"], r["task_id"]): outcome(r) for r in results[0]}
+    changed = []
+    for row in results[1]:
+        key = (row["model_id"], row["task_id"])
+        if key in before and before[key] != outcome(row):
+            changed.append((*key, before[key], outcome(row)))
+    lines.append('')
+    if not before.keys() & {(r["model_id"], r["task_id"]) for r in results[1]}:
+        lines.append(paint('No model ran the same task in both runs, so answers cannot be compared task by task.', 'dim'))
+    elif not changed:
+        lines.append(paint('Every shared task had the same outcome in both runs.', 'green'))
+    else:
+        styles = {'pass': 'green', 'fail': 'red', 'error': 'yellow'}
+        lines.append(paint(f'{len(changed)} task{"s" if len(changed) != 1 else ""} changed outcome:', 'bold'))
+        model_width = max(len(m) for m, *_ in changed)
+        task_width = max(len(t) for _, t, *_ in changed)
+        for model, task, old, new in sorted(changed):
+            lines.append(f'  {model.ljust(model_width)}  {task.ljust(task_width)}  {paint(old, styles[old])} {arrow} {paint(new, styles[new])}')
+    return '\n'.join(lines)
+
+
 def markdown_report(data: dict) -> str:
     run = data["run"]
     snap = run["snapshot"]

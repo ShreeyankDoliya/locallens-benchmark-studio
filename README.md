@@ -144,6 +144,16 @@ llm-bench export --run-id resume-demo --output dashboard/data
 
 A single-writer OS lock prevents concurrent runners from sharing a database. Each final attempt and its result commit atomically. A hard kill between generation and commit can require repeating that request: this is checkpointed at-least-once execution, not an exactly-once guarantee. Interrupted attempts remain visible. Timeouts cancel the client request; an inference server may continue work after disconnection.
 
+## Compare runs in the terminal
+
+`llm-bench list` shows each run's status and saved/planned result count. Compare two saved runs without exporting them:
+
+```bash
+llm-bench compare my-mock local-qwen-01
+```
+
+It prints pass rate, change in percentage points and p50 latency for each model ID, warns when the datasets, scorer, configuration or hardware differ, and lists every task whose pass/fail/error outcome changed for the same model. In the dashboard, **Download CSV** saves the task explorer rows that match the current filters, and `/` jumps to search.
+
 ## Export and reproduce a report
 
 ```bash

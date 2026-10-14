@@ -52,6 +52,30 @@ test('compare runs, reset filters, and download report', async ({ page }) => {
   expect((await downloadEvent).suggestedFilename()).toBe('mock-demo.md');
 });
 
+test('filtered results download as safe CSV and / focuses search', async ({ page }) => {
+  await page.route('**/data/mock-demo.json', async route => {
+    const response = await route.fetch(); const data = await response.json();
+    data.results.find(r => r.model_id === 'mock-hasty' && !r.judgment.passed && !r.error).response = '=HYPERLINK("x"), "quoted"';
+    await route.fulfill({ json: data });
+  });
+  await openMock(page);
+  await page.locator('h1').click();
+  await page.keyboard.press('/');
+  await expect(page.locator('#search')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await choose(page, '#outcome-filter', 'failed');
+  await expect(page.locator('#task-table tbody tr')).toHaveCount(12);
+  const downloadEvent = page.waitForEvent('download');
+  await page.getByRole('button', { name: '↓ Download CSV' }).click();
+  const download = await downloadEvent;
+  expect(download.suggestedFilename()).toBe('mock-demo-results.csv');
+  const csv = await (await download.createReadStream()).toArray().then(chunks => Buffer.concat(chunks).toString('utf8'));
+  expect(csv.split('\r\n')[0]).toBe('run_id,model_id,task_id,category,variant,outcome,latency_ms,input_tokens,output_tokens,attempts,prompt,expected,response,error');
+  expect(csv).toContain(`"'=HYPERLINK(""x""), ""quoted"""`);
+  expect(csv).not.toContain(',=HYPERLINK');
+  expect(csv.split('\r\nmock-demo,').length - 1).toBe(12);
+});
+
 test('mobile layout stays within viewport and filters work', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openMock(page);
